@@ -322,9 +322,16 @@
                 return;
             }
 
-            const loader = document.getElementById('loader');
-            loader.style.display = 'block';
+            // 1. ZAPIS OPTYMISTYCZNY - od razu zmieniamy widok u użytkownika
+            const previousStatus = userData[dayToUpdate];
+            if (status === 'none') {
+                delete userData[dayToUpdate];
+            } else {
+                userData[dayToUpdate] = status;
+            }
+            renderGrid();
 
+            // 2. Wysłanie danych do Google Sheets w tle (bez blokowania i czekania)
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -336,23 +343,30 @@
             })
             .then(response => response.json())
             .then(result => {
-                loader.style.display = 'none';
                 if (result.success) {
-                    if (status === 'none') {
-                        delete userData[dayToUpdate];
-                    } else {
-                        userData[dayToUpdate] = status;
-                    }
+                    // Aktualizujemy liczy zamrożeń/nadrobień z oficjalnej odpowiedzi serwera
                     document.getElementById('freezesCount').innerText = result.freezesCount;
                     document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
-                    renderGrid();
-                    loadLeaderboard();
+                    loadLeaderboard(); // Odświeżamy tablicę wyników w tle
                 } else {
+                    // W razie błędu serwera cofamy zmianę u użytkownika i informujemy
+                    if (previousStatus) {
+                        userData[dayToUpdate] = previousStatus;
+                    } else {
+                        delete userData[dayToUpdate];
+                    }
+                    renderGrid();
                     alert('Błąd serwera: ' + result.message);
                 }
             })
             .catch(err => {
-                loader.style.display = 'none';
+                // W razie błędu sieciowego również cofamy zmianę
+                if (previousStatus) {
+                    userData[dayToUpdate] = previousStatus;
+                } else {
+                    delete userData[dayToUpdate];
+                }
+                renderGrid();
                 alert('Błąd połączenia z serwerem: ' + err);
             });
         }
