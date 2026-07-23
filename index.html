@@ -116,6 +116,7 @@
         .day-box.done { background-color: var(--done); color: white; }
         .day-box.frozen { background-color: var(--frozen); color: white; }
         .day-box.recovered { background-color: var(--recovered); color: white; }
+        .day-box.missed { background-color: #ef4444; color: white; }
 
         .day-label {
             font-size: 11px;
@@ -152,6 +153,8 @@
         .btn-done { background-color: var(--done); }
         .btn-frozen { background-color: var(--frozen); }
         .btn-recovered { background-color: var(--recovered); }
+        .btn-missed { background-color: #ef4444; }
+        .btn-missed:hover { background-color: #dc2626; }
         .btn-clear { background-color: #64748b; }
 
         .leaderboard-section {
@@ -182,6 +185,7 @@
             display: none;
             margin: 10px 0;
         }
+        
     </style>
 </head>
 <body>
@@ -236,14 +240,16 @@
         </div>
     </div>
 
-    <!-- MODAL WYBORU STATUSU -->
-  <div class="modal-overlay" id="statusModal">
+    
+  <!-- MODAL WYBORU STATUSU -->
+    <div class="modal-overlay" id="statusModal">
         <div class="modal">
             <h3 id="modalTitle">Wybierz status</h3>
             <button class="btn-done" onclick="setStatusAndSend('done')">✅ Uczyłem się</button>
+            <button class="btn-missed" onclick="setStatusAndSend('missed')">❌ Nie uczyłem się</button>
             <button class="btn-frozen" onclick="setStatusAndSend('frozen')">❄️ Zamrożone</button>
             <button class="btn-recovered" onclick="setStatusAndSend('recovered')">🔥 Nadrobione</button>
-            <button class="btn-clear" onclick="setStatusAndSend('none')">❌ Wyczyść (brak)</button>
+            <button class="btn-clear" onclick="setStatusAndSend('none')">🗑️ Usuń status</button>
             <button onclick="closeModal()" style="background: #cbd5e1; color: #1e293b; margin-top: 10px;">Anuluj</button>
         </div>
     </div>
@@ -296,12 +302,12 @@
         }
 
         function getStatusLabel(status) {
-            if (status === 'done') return 'Zaliczono';
-            if (status === 'frozen') return 'Zamrożono';
-            if (status === 'recovered') return 'Nadrobiono';
+            if (status === 'done') return 'Zaliczone';
+            if (status === 'missed') return 'Niezaliczone';
+            if (status === 'frozen') return 'Zamrożone';
+            if (status === 'recovered') return 'Nadrobione';
             return '';
         }
-
         function openModal(day) {
             activeDay = day;
             document.getElementById('modalTitle').innerText = `Dzień ${day}`;
