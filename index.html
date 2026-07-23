@@ -217,7 +217,7 @@
 
             <!-- TABLICA WYNIKÓW -->
             <div class="leaderboard-section">
-                <h2>🏆 Publiczna Tablica Wyników</h2>
+                <h2>🏆 Tablica Wyników</h2>
                 <table>
                     <thead>
                         <tr>
@@ -296,9 +296,9 @@
         }
 
         function getStatusLabel(status) {
-            if (status === 'done') return 'Uczone';
-            if (status === 'frozen') return 'Zamroż.';
-            if (status === 'recovered') return 'Nadr.';
+            if (status === 'done') return 'Zaliczono';
+            if (status === 'frozen') return 'Zamrożono';
+            if (status === 'recovered') return 'Nadrobiono';
             return '';
         }
 
