@@ -118,11 +118,11 @@
         .day-box.recovered { background-color: var(--recovered); color: white; }
 
         .day-label {
-            font-size: 12px;
-            opacity: 0.8;
+            font-size: 11px;
+            opacity: 0.9;
         }
 
-        /* Modal / Menu wyboru statusu */
+        /* Modal do wyboru statusu */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -210,7 +210,7 @@
             <div class="loader" id="loader">Zapisywanie danych...</div>
 
             <div class="grid" id="daysGrid">
-                <!-- Generowane dynamicznie w JS -->
+                <!-- Generowane dynamicznie -->
             </div>
 
             <button onclick="logout()" style="background-color: #64748b; width: 100%;">Zmień użytkownika</button>
@@ -249,8 +249,8 @@
     </div>
 
     <script>
-        // TUTAJ WKLEJ SWÓJ URL DO WEB APP Z GOOGLE APPS SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVjbNgF2kwFL1dFxPayzY0XKP23Naw0L79TgwAuUL_j8PfMs7rOvBvle40KAjNCnf1/exec";
+        // TUTAJ WSTAW SWÓJ URL DO WEB APP Z GOOGLE APPS SCRIPT
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySzjwyMxTG-J-SaMSiu6ORl4n2f_-NEm5vMGFh-L8FvJ5FRlRNi6Y-YjD2UFFyaPM4/exec";
 
         let currentUser = localStorage.getItem('hs_user') || '';
         let userData = {};
