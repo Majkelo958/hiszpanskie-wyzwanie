@@ -257,21 +257,59 @@
 
     
   <!-- MODAL WYBORU STATUSU -->
-    <div class="modal-overlay" id="statusModal">
-        <div class="modal">
-            <h3 id="modalTitle">Wybierz status</h3>
-            <button class="btn-done" onclick="setStatusAndSend('done')">✅ Uczyłem się</button>
-            <button class="btn-missed" onclick="setStatusAndSend('missed')">❌ Nie uczyłem się</button>
-            <button class="btn-frozen" onclick="setStatusAndSend('frozen')">❄️ Zamrożone</button>
-            <button class="btn-recovered" onclick="setStatusAndSend('recovered')">🔥 Nadrobione</button>
-            <button class="btn-clear" onclick="setStatusAndSend('none')">🗑️ Usuń status</button>
-            <button onclick="closeModal()" style="background: #cbd5e1; color: #1e293b; margin-top: 10px;">Anuluj</button>
-        </div>
+<div class="modal-overlay" id="statusModal">
+    <div class="modal">
+        <h3 id="modalTitle">Wybierz status</h3>
+        <button class="btn-done" onclick="setStatusAndSend('done')">✅ Uczyłem się</button>
+        <button class="btn-missed" onclick="setStatusAndSend('missed')">❌ Nie uczyłem się</button>
+        <button class="btn-frozen" onclick="setStatusAndSend('frozen')">❄️ Zamrożone</button>
+        <!-- NOWY PRZYCISK DO PRZEKAZANIA ZAMROŻENIA -->
+        <button class="btn-frozen" style="background-color: #0284c7;" onclick="promptGiftFreeze()">🎁 Podaruj zamrożenie komuś</button>
+        <button class="btn-recovered" onclick="setStatusAndSend('recovered')">🔥 Nadrobione</button>
+        <button class="btn-clear" onclick="setStatusAndSend('none')">🗑️ Usuń status</button>
+        <button onclick="closeModal()" style="background: #cbd5e1; color: #1e293b; margin-top: 10px;">Anuluj</button>
     </div>
+</div>
 
     <script>
+
+        function promptGiftFreeze() {
+    const dayToGift = activeDay;
+    closeModal();
+
+    if (!dayToGift) {
+        alert('Błąd: Nie wybrano dnia!');
+        return;
+    }
+
+    const targetUser = prompt("Wpisz imię/nick osoby, której chcesz podarować zamrożenie:");
+    if (!targetUser || !targetUser.trim()) return;
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'giftFreeze',
+            fromUser: currentUser,
+            toUser: targetUser.trim(),
+            day: dayToGift
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert(`Pomyślnie podarowano zamrożenie dla użytkownika ${targetUser.trim()}!`);
+            loadUserData(); // Odświeżenie widoku
+        } else {
+            alert('Błąd: ' + result.message);
+        }
+    })
+    .catch(err => {
+        alert('Błąd połączenia z serwerem: ' + err);
+    });
+}
+        
         // TUTAJ WSTAW SWÓJ URL DO WEB APP Z GOOGLE APPS SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcrvyPhnxObGuhSAyjipmnpSGTO_vjW4z_xr5MxTq9QJiWIt-XXOsIbD7h9ErXcVU8/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9Ch7qvXTW_gzByuhHywvwnsptecBPoUif9Hjnl2unwMpPvS4We-NAB7Vxjx3dhOI2/exec";
 
         let currentUser = localStorage.getItem('hs_user') || '';
         let userData = {};
