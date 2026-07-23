@@ -419,25 +419,52 @@
         }
 
         async function loadUserData() {
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('dashboardSection').classList.add('active');
-            document.getElementById('welcomeUser').innerText = `Witaj, ${currentUser}!`;
+    document.getElementById('loginSection').classList.remove('active');
+    document.getElementById('dashboardSection').classList.add('active');
+    document.getElementById('welcomeUser').innerText = `Witaj, ${currentUser}!`;
 
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    userData = result.days || {};
-                    document.getElementById('freezesCount').innerText = result.freezesCount;
-                    document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
-                    renderGrid();
-                    loadLeaderboard();
-                }
-            } catch (err) {
-                console.error('Nie udało się pobrać danych', err);
-            }
+    try {
+        // Wysyłamy oba zapytania DO GOOGLE NARAZ (równolegle), zamiast po kolei!
+        const [userResponse, leaderboardResponse] = await Promise.all([
+            fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`),
+            fetch(`${SCRIPT_URL}?action=getLeaderboard`)
+        ]);
+
+        const userResult = await userResponse.json();
+        const leaderboardResult = await leaderboardResponse.json();
+        
+        // 1. Obsługa danych użytkownika
+        if (userResult.success) {
+            userData = userResult.days || {};
+            document.getElementById('freezesCount').innerText = userResult.freezesCount;
+            document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
+            renderGrid();
         }
+
+        // 2. Obsługa tablicy wyników i nagród
+        if (leaderboardResult.success) {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+            
+            leaderboardResult.data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${index + 1}</td>
+                    <td>${row.user}</td>
+                    <td><b>${row.done}</b></td>
+                    <td>${row.freezes}</td>
+                    <td>${row.recoveries}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateAwards(leaderboardResult.data);
+        }
+
+    } catch (err) {
+        console.error('Nie udało się pobrać danych', err);
+    }
+}
 
         async function loadLeaderboard() {
             try {
