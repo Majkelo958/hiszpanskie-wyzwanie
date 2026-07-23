@@ -328,7 +328,34 @@
                 return;
             }
 
-            // 1. ZAPIS OPTYMISTYCZNY - od razu zmieniamy widok u użytkownika
+            // 1. Walidacja limitów po stronie klienta (zanim cokolwiek zmienimy)
+            if (status === 'frozen') {
+                let currentFreezes = 0;
+                for (let d in userData) {
+                    if (userData[d] === 'frozen' && parseInt(d) !== parseInt(dayToUpdate)) {
+                        currentFreezes++;
+                    }
+                }
+                if (currentFreezes >= 2) {
+                    alert('Przekroczono limit 2 zamrożeń!');
+                    return;
+                }
+            }
+
+            if (status === 'recovered') {
+                let currentRecoveries = 0;
+                for (let d in userData) {
+                    if (userData[d] === 'recovered' && parseInt(d) !== parseInt(dayToUpdate)) {
+                        currentRecoveries++;
+                    }
+                }
+                if (currentRecoveries >= 2) {
+                    alert('Przekroczono limit 2 nadrobień!');
+                    return;
+                }
+            }
+
+            // 2. Jeśli limity są OK, robimy optymistyczną zmianę na ekranie
             const previousStatus = userData[dayToUpdate];
             if (status === 'none') {
                 delete userData[dayToUpdate];
@@ -337,7 +364,7 @@
             }
             renderGrid();
 
-            // 2. Wysłanie danych do Google Sheets w tle (bez blokowania i czekania)
+            // 3. Wysłanie danych do Google Sheets w tle
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -350,12 +377,11 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    // Aktualizujemy liczy zamrożeń/nadrobień z oficjalnej odpowiedzi serwera
                     document.getElementById('freezesCount').innerText = result.freezesCount;
                     document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
-                    loadLeaderboard(); // Odświeżamy tablicę wyników w tle
+                    loadLeaderboard();
                 } else {
-                    // W razie błędu serwera cofamy zmianę u użytkownika i informujemy
+                    // Awaryjne cofnięcie, gdyby serwer zwrócił inny błąd
                     if (previousStatus) {
                         userData[dayToUpdate] = previousStatus;
                     } else {
@@ -366,7 +392,6 @@
                 }
             })
             .catch(err => {
-                // W razie błędu sieciowego również cofamy zmianę
                 if (previousStatus) {
                     userData[dayToUpdate] = previousStatus;
                 } else {
