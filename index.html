@@ -237,13 +237,13 @@
     </div>
 
     <!-- MODAL WYBORU STATUSU -->
-    <div class="modal-overlay" id="statusModal">
+  <div class="modal-overlay" id="statusModal">
         <div class="modal">
             <h3 id="modalTitle">Wybierz status</h3>
-            <button class="btn-done" onclick="setStatus('done')">✅ Uczyłem się</button>
-            <button class="btn-frozen" onclick="setStatus('frozen')">❄️ Zamrożone</button>
-            <button class="btn-recovered" onclick="setStatus('recovered')">🔥 Nadrobione</button>
-            <button class="btn-clear" onclick="setStatus('none')">❌ Wyczyść (brak)</button>
+            <button class="btn-done" onclick="setStatusAndSend('done')">✅ Uczyłem się</button>
+            <button class="btn-frozen" onclick="setStatusAndSend('frozen')">❄️ Zamrożone</button>
+            <button class="btn-recovered" onclick="setStatusAndSend('recovered')">🔥 Nadrobione</button>
+            <button class="btn-clear" onclick="setStatusAndSend('none')">❌ Wyczyść (brak)</button>
             <button onclick="closeModal()" style="background: #cbd5e1; color: #1e293b; margin-top: 10px;">Anuluj</button>
         </div>
     </div>
@@ -313,41 +313,48 @@
             document.getElementById('statusModal').style.display = 'none';
         }
 
-        async function setStatus(status) {
+        function setStatusAndSend(status) {
+            const dayToUpdate = activeDay;
             closeModal();
+            
+            if (!dayToUpdate) {
+                alert('Błąd: Nie wybrano dnia!');
+                return;
+            }
+
             const loader = document.getElementById('loader');
             loader.style.display = 'block';
 
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'updateDay',
-                        user: currentUser,
-                        day: activeDay,
-                        status: status
-                    })
-                });
-                const result = await response.json();
-                
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'updateDay',
+                    user: currentUser,
+                    day: dayToUpdate,
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                loader.style.display = 'none';
                 if (result.success) {
                     if (status === 'none') {
-                        delete userData[activeDay];
+                        delete userData[dayToUpdate];
                     } else {
-                        userData[activeDay] = status;
+                        userData[dayToUpdate] = status;
                     }
                     document.getElementById('freezesCount').innerText = result.freezesCount;
                     document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
                     renderGrid();
                     loadLeaderboard();
                 } else {
-                    alert('Błąd: ' + result.message);
+                    alert('Błąd serwera: ' + result.message);
                 }
-            } catch (err) {
-                alert('Błąd połączenia z serwerem: ' + err);
-            } finally {
+            })
+            .catch(err => {
                 loader.style.display = 'none';
-            }
+                alert('Błąd połączenia z serwerem: ' + err);
+            });
         }
 
         async function loadUserData() {
