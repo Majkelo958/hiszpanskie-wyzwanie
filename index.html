@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiszpańskie Wyzwanie 30 Dni</title>
+    <style>
+        :root {
+            --bg-color: #faf8f5;
+            --card-bg: #ffffff;
+            --primary: #c2410c;
+            --primary-hover: #9a3412;
+            --text-main: #1c1917;
+            --text-muted: #78716c;
+            --border-color: #e7e5e4;
+            --done: #15803d;
+            --frozen: #0284c7;
+            --recovered: #b45309;
+            --none: #f5f5f4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--primary);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .login-box {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 280px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #fdfbf7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .day-card {
+            background: var(--none);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .day-card:hover {
+            border-color: var(--text-muted);
+        }
+
+        .day-card.status-done {
+            background: #dcfce7;
+            border-color: var(--done);
+            color: #14532d;
+        }
+
+        .day-card.status-frozen {
+            background: #e0f2fe;
+            border-color: var(--frozen);
+            color: #0369a1;
+        }
+
+        .day-card.status-recovered {
+            background: #fef3c7;
+            border-color: var(--recovered);
+            color: #78350f;
+        }
+
+        .day-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .day-status {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .leaderboard-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .error-msg {
+            color: #dc2626;
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Hiszpańskie Wyzwanie 30 Dni</h1>
+        <p class="subtitle">Codzienna nauka, system zamrożeń i wspólna motywacja</p>
+    </header>
+
+    <!-- Ekran logowania / wyboru użytkownika -->
+    <div class="card" id="login-section">
+        <h2 style="font-size: 18px; margin-bottom: 15px; text-align: center;">Wpisz swoje imię, aby dołączyć lub kontynuować</h2>
+        <div class="login-box">
+            <input type="text" id="username-input" placeholder="Twoje imię lub nick...">
+            <button onclick="handleLogin()">Wejdź do wyzwania</button>
+        </div>
+        <div id="login-error" class="error-msg"></div>
+    </div>
+
+    <!-- Główny panel użytkownika -->
+    <div id="app-section" class="hidden">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <h2 id="welcome-user" style="font-size: 18px;">Witaj, Uczniu!</h2>
+                <button onclick="logout()" style="background: var(--text-muted); padding: 6px 12px; font-size: 14px;">Zmień użytkownika</button>
+            </div>
+
+            <div class="stats-bar">
+                <div>Zaliczone dni: <strong id="stat-done">0</strong>/30</div>
+                <div>Pozostałe zamrożenia (max 2): <strong id="stat-freezes">2</strong></div>
+                <div>Pozostałe nadrobienia (max 2): <strong id="stat-recoveries">2</strong></div>
+            </div>
+
+            <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 15px;">
+                Kliknij w dany dzień, aby zmienić status: <strong>Niezaznaczony</strong> ➔ <strong>✅ Uczyłem się</strong> ➔ <strong>🧊 Zamrożone</strong> ➔ <strong>🔄 Nadrobione</strong> ➔ Powrót
+            </p>
+
+            <div class="days-grid" id="days-container">
+                <!-- Generowane dynamicznie przez JS -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #dcfce7; border: 1px solid var(--done);"></div> Uczyłem się</div>
+                <div class="legend-item"><div class="legend-color" style="background: #e0f2fe; border: 1px solid var(--frozen);"></div> Zamrożone</div>
+                <div class="legend-item"><div class="legend-color" style="background: #fef3c7; border: 1px solid var(--recovered);"></div> Nadrobione</div>
+            </div>
+        </div>
+
+        <!-- Tablica Wyników Grupy -->
+        <div class="card">
+            <h2 style="font-size: 18px; margin-bottom: 10px;">Tablica wyników grupy</h2>
+            <div id="leaderboard-loading" class="loading">Ładowanie wyników uczestników...</div>
+            <div style="overflow-x: auto;">
+                <table class="leaderboard-table hidden" id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Uczestnik</th>
+                            <th>Zaliczone dni</th>
+                            <th>Zamrożenia użyte</th>
+                            <th>Nadrobienia użyte</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Generowane dynamicznie -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ TUTAJ WKLEJ SWÓJ URL DO DEPLOYMENTU GOOGLE APPS SCRIPT (Web App)
+    const API_URL = "https://script.google.com/macros/s/AKfycbyVC6egS2z5WkJVP3OLoVSqLJUcyTAecexPu9o2NnJ8CvS_l9RIVAKDsfeoAS37L2pb/exec";
+
+    let currentUser = localStorage.getItem('spanish_challenge_user') || '';
+    let userData = {
+        days: {}, // np. { "1": "done", "2": "frozen" }
+        freezesCount: 2,
+        recoveriesCount: 2
+    };
+
+    window.onload = function() {
+        if (currentUser) {
+            document.getElementById('username-input').value = currentUser;
+            loadUserData();
+        }
+    };
+
+    function handleLogin() {
+        const input = document.getElementById('username-input').value.trim();
+        const errorDiv = document.getElementById('login-error');
+        if (!input) {
+            errorDiv.textContent = "Proszę wpisać imię lub nick.";
+            return;
+        }
+        errorDiv.textContent = "";
+        currentUser = input;
+        localStorage.setItem('spanish_challenge_user', currentUser);
+        loadUserData();
+    }
+
+    function logout() {
+        localStorage.removeItem('spanish_challenge_user');
+        currentUser = '';
+        document.getElementById('app-section').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+    }
+
+    async function loadUserData() {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('welcome-user').textContent = `Witaj, ${currentUser}!`;
+
+        renderDaysGrid();
+        fetchLeaderboard();
+        
+        try {
+            const response = await fetch(`${API_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`);
+            const result = await response.json();
+            if (result.success) {
+                userData.days = result.days || {};
+                userData.freezesCount = result.freezesCount !== undefined ? result.freezesCount : 2;
+                userData.recoveriesCount = result.recoveriesCount !== undefined ? result.recoveriesCount : 2;
+                updateStats();
+                renderDaysGrid();
+            }
+        } catch (err) {
+            console.error("Błąd pobierania danych:", err);
+        }
+    }
+
+    function renderDaysGrid() {
+        const container = document.getElementById('days-container');
+        container.innerHTML = '';
+
+        for (let i = 1; i <= 30; i++) {
+            const status = userData.days[i] || 'none';
+            const card = document.createElement('div');
+            card.className = `day-card status-${status}`;
+            card.onclick = () => cycleDayStatus(i);
+
+            let statusText = 'Niezaznaczony';
+            if (status === 'done') statusText = '✅ Uczyłem się';
+            if (status === 'frozen') statusText = '🧊 Zamrożone';
+            if (status === 'recovered') statusText = '🔄 Nadrobione';
+
+            card.innerHTML = `
+                <div class="day-title">Dzień ${i}</div>
+                <div class="day-status">${statusText}</div>
+            `;
+            container.appendChild(card);
+        }
+    }
+
+    async function cycleDayStatus(dayNumber) {
+        const currentStatus = userData.days[dayNumber] || 'none';
+        let nextStatus = 'none';
+
+        // Cykl zmian: none -> done -> frozen -> recovered -> none
+        if (currentStatus === 'none') nextStatus = 'done';
+        else if (currentStatus === 'done') nextStatus = 'frozen';
+        else if (currentStatus === 'frozen') nextStatus = 'recovered';
+        else if (currentStatus === 'recovered') nextStatus = 'none';
+
+        // Sprawdzenie lokalnych limitów przed wysłaniem do API
+        let tempFreezes = 2 - Object.values(userData.days).filter(s => s === 'frozen').length;
+        let tempRecoveries = 2 - Object.values(userData.days).filter(s => s === 'recovered').length;
+
+        if (nextStatus === 'frozen' && tempFreezes <= 0 && currentStatus !== 'frozen') {
+            alert("Wykorzystano już maksymalnie 2 zamrożenia!");
+            return;
+        }
+        if (nextStatus === 'recovered' && tempRecoveries <= 0 && currentStatus !== 'recovered') {
+            alert("Wykorzystano już maksymalnie 2 nadrobienia!");
+            return;
+        }
+
+        // Zapis optymistyczny lokalnie
+        if (nextStatus === 'none') {
+            delete userData.days[dayNumber];
+        } else {
+            userData.days[dayNumber] = nextStatus;
+        }
+
+        updateStats();
+        renderDaysGrid();
+
+        // Wysyłka do Google Apps Script
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'updateDay',
+                    user: currentUser,
+                    day: dayNumber,
+                    status: nextStatus
+                })
+            });
+            const result = await response.json();
+            if (!result.success) {
+                alert("Błąd serwera: " + result.message);
+                loadUserData(); // przeładuj w razie błędu
+            } else {
+                userData.freezesCount = result.freezesCount;
+                userData.recoveriesCount = result.recoveriesCount;
+                updateStats();
+                fetchLeaderboard();
+            }
+        } catch (err) {
+            console.error("Błąd połączenia z siecią:", err);
+        }
+    }
+
+    function updateStats() {
+        let doneCount = 0;
+        let freezeCountUsed = 0;
+        let recoveryCountUsed = 0;
+
+        for (let day in userData.days) {
+            if (userData.days[day] === 'done') doneCount++;
+            if (userData.days[day] === 'frozen') freezeCountUsed++;
+            if (userData.days[day] === 'recovered') recoveryCountUsed++;
+        }
+
+        document.getElementById('stat-done').textContent = doneCount;
+        document.getElementById('stat-freezes').textContent = 2 - freezeCountUsed;
+        document.getElementById('stat-recoveries').textContent = 2 - recoveryCountUsed;
+    }
+
+    async function fetchLeaderboard() {
+        try {
+            const response = await fetch(`${API_URL}?action=getLeaderboard`);
+            const result = await response.json();
+            if (result.success) {
+                const tbody = document.getElementById('leaderboard-body');
+                tbody.innerHTML = '';
+                result.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${row.user}</strong></td>
+                        <td>${row.done} / 30</td>
+                        <td>${row.freezes} / 2</td>
+                        <td>${row.recoveries} / 2</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                document.getElementById('leaderboard-loading').classList.add('hidden');
+                document.getElementById('leaderboard-table').classList.remove('hidden');
+            }
+        } catch (err) {
+            console.error("Błąd pobierania tablicy wyników:", err);
+            document.getElementById('leaderboard-loading').textContent = "Nie udało się pobrać tablicy wyników.";
+        }
+    }
+</script>
+
+</body>
+</html>
