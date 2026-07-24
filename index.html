@@ -41,7 +41,7 @@
             <h1 id="welcomeUser">Witaj</h1>
             
             <div class="stats-panel">
-                <div>Zamrożenia: <span id="freezesCount">0</span>/<span id="maxFreezesLimit">2</span></div>
+                <div>Zamrożenia: <span id="freezesCount">2</span>/2</div>
                 <div>Nadrobienia: <span id="recoveriesCount">2</span>/2</div>
             </div>
 
@@ -70,7 +70,7 @@
 
     <script>
         // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WPROWADZENIA WEB APP
-        const SCRIPT_URL = "https://script.google.com/macros/library/d/1fhBPkORRDP3TehKDn6FtOxTZE8gIz8xl-jlLqwTr7NCcmKXFik3pZGLQ/14"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzTGl9nVWTPsPb1QE28EaRCWgSkDo8QLmNVu7UhMc8YTyc2q5fgZWe-mn0rs4EiEHN/exec"; 
 
         let currentUser = "";
         let userData = {};
@@ -101,11 +101,8 @@
                 
                 if (userResult.success) {
                     userData = userResult.days || {};
-                    
-                    document.getElementById('freezesCount').innerText = userResult.freezesCount ?? 0;
-                    document.getElementById('maxFreezesLimit').innerText = userResult.maxLimit ?? 2;
-                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount ?? 2;
-                    
+                    document.getElementById('freezesCount').innerText = userResult.freezesCount;
+                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
                     renderGrid();
                 }
 
@@ -181,9 +178,6 @@
                     
                     if (result.freezesCount !== undefined) {
                         document.getElementById('freezesCount').innerText = result.freezesCount;
-                    }
-                    if (result.maxLimit !== undefined) {
-                        document.getElementById('maxFreezesLimit').innerText = result.maxLimit;
                     }
                     if (result.recoveriesCount !== undefined) {
                         document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
