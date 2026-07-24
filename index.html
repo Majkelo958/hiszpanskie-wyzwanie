@@ -85,10 +85,10 @@
                         <tr class="border-b border-slate-100 text-slate-400 font-medium">
                             <th class="py-3 px-3">Miejsce</th>
                             <th class="py-3 px-3">Użytkownik</th>
-                            <th class="py-3 px-3">Ukończone dni</th>
+                            <th class="py-3 px-3">Campeón de la disciplina</th>
                             <th class="py-3 px-3">Zamrożenia</th>
                             <th class="py-3 px-3">Nadrobienia</th>
-                            <th class="py-3 px-3">Streak</th>
+                            <th class="py-3 px-3">Mejor racha</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body">
@@ -104,10 +104,10 @@
         Wyzwanie 30 Dni &copy; 2026
     </footer>
 
-    <!-- Skrypt obsługujący logikę frontendu i polling -->
+    <!-- Skrypt obsługujący logikę frontendu -->
     <script>
-        // ADRES URL DO TWOJEGO WEBAKTU GOOGLE APPS SCRIPT (Wklej swój deployment URL)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCKnU0HxIOwCS-nS-0pbNAE4uYShjflasrLOG0IwMsKn7UABfdVvT78f_QHSoGDPRI/exec"; 
+        // ADRES URL DO TWOJEGO WEBAKTU GOOGLE APPS SCRIPT
+        const SCRIPT_URL = "TUTAJ_WKLEJ_SWOJ_WEB_APP_URL"; 
 
         let currentUser = localStorage.getItem("challenge_username") || "";
 
@@ -116,13 +116,6 @@
                 document.getElementById("login-screen").classList.add("hidden");
                 document.getElementById("display-username").innerText = currentUser;
                 fetchAllData();
-                
-                // Uruchomienie automatycznego odpytywania (polling) co 10 sekund w tle
-                setInterval(function() {
-                    if (currentUser) {
-                        fetchAllData(true); // true oznacza tryb "cichy" bez loaderów/zakłócania pracy
-                    }
-                }, 10000);
             } else {
                 document.getElementById("login-screen").classList.remove("hidden");
             }
@@ -147,12 +140,12 @@
             location.reload();
         }
 
-        function fetchAllData(isSilent = false) {
-            loadUserData(isSilent);
-            loadLeaderboard(isSilent);
+        function fetchAllData() {
+            loadUserData();
+            loadLeaderboard();
         }
 
-        function loadUserData(isSilent = false) {
+        function loadUserData() {
             fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`)
                 .then(res => res.json())
                 .then(data => {
@@ -172,7 +165,6 @@
             for (let i = 1; i <= 30; i++) {
                 const status = daysData[i] || "none";
                 let bgClass = "bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200";
-                let label = `Dzień ${i}`;
 
                 if (status === "done") {
                     bgClass = "bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-500/20";
@@ -217,7 +209,7 @@
             .catch(err => console.error("Błąd aktualizacji dnia:", err));
         }
 
-        function loadLeaderboard(isSilent = false) {
+        function loadLeaderboard() {
             fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                 .then(res => res.json())
                 .then(data => {
@@ -230,7 +222,6 @@
                         select.innerHTML = '<option value="">Wybierz użytkownika, któremu chcesz podarować zamrożenie...</option>';
 
                         data.data.forEach((row, index) => {
-                            // Wypełnianie tabeli wyników
                             const tr = document.createElement("tr");
                             tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
                             tr.innerHTML = `
@@ -243,7 +234,6 @@
                             `;
                             tbody.appendChild(tr);
 
-                            // Wypełnianie selecta do darowania prezentów (pomijając samego siebie)
                             if (row.user !== currentUser) {
                                 const opt = document.createElement("option");
                                 opt.value = row.user;
