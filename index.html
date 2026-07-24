@@ -30,7 +30,7 @@
         .stat-card { background: #ecf0f1; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 15px; color: #34495e; }
         .stat-card span { display: block; font-size: 22px; color: var(--primary); margin-top: 5px; }
 
-        /* Kafelki nagród (Campeon i Mejor racha) */
+        /* Kafelki nagród */
         .awards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .award-card { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 18px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3); }
         .award-card h3 { margin: 0 0 8px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
@@ -44,6 +44,19 @@
         .day-box.frozen { background-color: var(--freeze); color: white; border-color: #2980b9; }
         .day-box.recovered { background-color: var(--recovery); color: white; border-color: #d35400; }
         .day-box.missed { background-color: var(--accent); color: white; border-color: #b03a2e; }
+
+        /* Modal wyboru statusu */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; padding: 25px; border-radius: 14px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
+        .modal h3 { margin-top: 0; color: var(--primary); }
+        .modal-btn { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; }
+        .modal-btn.btn-done { background-color: var(--success); }
+        .modal-btn.btn-missed { background-color: var(--accent); }
+        .modal-btn.btn-freeze { background-color: var(--freeze); }
+        .modal-btn.btn-recovery { background-color: var(--recovery); }
+        .modal-btn.btn-clear { background-color: #95a5a6; }
+        .modal-btn:hover { opacity: 0.9; }
 
         /* Tabela wyników */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 8px; overflow: hidden; }
@@ -114,12 +127,26 @@
         </div>
     </div>
 
+    <!-- Modal wyboru statusu dnia -->
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modalTitle">Wybierz status</h3>
+            <button class="modal-btn btn-done" onclick="setStatus('done')">✅ Zaliczone</button>
+            <button class="modal-btn btn-missed" onclick="setStatus('missed')">❌ Nie zaliczono</button>
+            <button class="modal-btn btn-freeze" onclick="setStatus('frozen')">❄️ Zamrożenie</button>
+            <button class="modal-btn btn-recovery" onclick="setStatus('recovered')">🔥 Nadrobiono</button>
+            <button class="modal-btn btn-clear" onclick="setStatus('none')">🗑️ Wyczyść status</button>
+            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal()">Zamknij</button>
+        </div>
+    </div>
+
     <script>
         // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WEB APP
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCKnU0HxIOwCS-nS-0pbNAE4uYShjflasrLOG0IwMsKn7UABfdVvT78f_QHSoGDPRI/exec"; 
 
         let currentUser = "";
         let userData = {};
+        let selectedDay = null;
 
         function handleLogin() {
             const input = document.getElementById('usernameInput').value.trim();
@@ -175,9 +202,20 @@
                     box.classList.add(status);
                 }
 
-                box.onclick = () => cycleDayStatus(i);
+                box.onclick = () => openModal(i);
                 grid.appendChild(box);
             }
+        }
+
+        function openModal(day) {
+            selectedDay = day;
+            document.getElementById('modalTitle').innerText = `Dzień ${day} - Wybierz status`;
+            document.getElementById('statusModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('statusModal').classList.remove('active');
+            selectedDay = null;
         }
 
         function renderLeaderboard(data) {
@@ -191,7 +229,6 @@
             let streakLeaderName = "Brak";
 
             data.forEach((row, index) => {
-                // Sprawdzamy lidera ukończonych (Campeón)
                 if (row.done > bestDone) {
                     bestDone = row.done;
                     championName = `${row.user} (${row.done} dni)`;
@@ -199,7 +236,6 @@
                     championName += `, ${row.user}`;
                 }
 
-                // Sprawdzamy lidera passy (Mejor racha)
                 if (row.streak > bestStreak) {
                     bestStreak = row.streak;
                     streakLeaderName = `${row.user} (${row.streak} z rzędu)`;
@@ -219,20 +255,14 @@
                 tbody.appendChild(tr);
             });
 
-            // Ustawienie wartości kafelków nagród
             document.getElementById('championAward').innerText = bestDone > 0 ? championName : "Brak danych";
             document.getElementById('streakAward').innerText = bestStreak > 0 ? streakLeaderName : "Brak danych";
         }
 
-        async function cycleDayStatus(day) {
-            const currentStatus = userData[day] || 'none';
-            let nextStatus = 'none';
-
-            if (currentStatus === 'none') nextStatus = 'done';
-            else if (currentStatus === 'done') nextStatus = 'frozen';
-            else if (currentStatus === 'frozen') nextStatus = 'recovered';
-            else if (currentStatus === 'recovered') nextStatus = 'missed';
-            else if (currentStatus === 'missed') nextStatus = 'none';
+        async function setStatus(nextStatus) {
+            if (!selectedDay) return;
+            const day = selectedDay;
+            closeModal();
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -262,7 +292,6 @@
 
                     renderGrid();
                     
-                    // Odśwież ranking i nagrody w tle
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
                         .then(leaderboardResult => {
