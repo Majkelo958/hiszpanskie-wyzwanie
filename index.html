@@ -3,283 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wyzwanie 30 Dni</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Hiszpańskie Wyzwanie</title>
     <style>
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 3px solid #3498db;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --freeze: #3498db;
+            --recovery: #e67e22;
+            --bg: #f4f6f9;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .section { display: none; }
+        .section.active { display: block; }
+        h1, h2 { color: var(--primary); text-align: center; font-size: 24px; }
+        
+        /* Ekran logowania */
+        #loginSection { text-align: center; padding: 40px 0; }
+        #loginSection input { padding: 12px 20px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; width: 80%; max-width: 300px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+        #loginSection button { padding: 12px 30px; font-size: 18px; background-color: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #loginSection button:hover { background-color: #34495e; }
+
+        /* Panel główny i statystyki */
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #ecf0f1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; color: #34495e; }
+        .stat-card span { display: block; font-size: 20px; color: var(--primary); margin-top: 5px; }
+
+        /* Kafelki Nagród i Akcji */
+        .awards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
+        @media(min-width: 768px) {
+            .awards-container { grid-template-columns: repeat(3, 1fr); }
         }
+        .award-card { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3); display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 85px; box-sizing: border-box; }
+        .award-card h3 { margin: 0 0 6px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .award-card p { margin: 0; font-size: 17px; font-weight: bold; word-break: break-word; }
+
+        .action-card { background: linear-gradient(135deg, #2980b9, #3498db); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); cursor: pointer; transition: transform 0.2s; border: none; width: 100%; color: white; font-family: inherit; }
+        .action-card:hover { transform: scale(1.02); opacity: 0.95; }
+
+        /* Siatka dni */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 8px; margin-top: 15px; }
+        .day-box { aspect-ratio: 1; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; background: #fff; transition: all 0.2s; font-size: 15px; }
+        .day-box:hover { transform: scale(1.05); border-color: #b2bec3; }
+        .day-box.done { background-color: var(--success); color: white; border-color: #219653; }
+        .day-box.frozen { background-color: var(--freeze); color: white; border-color: #2980b9; }
+        .day-box.recovered { background-color: var(--recovery); color: white; border-color: #d35400; }
+        .day-box.missed { background-color: var(--accent); color: white; border-color: #b03a2e; }
+
+        /* Modale */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
+        .modal h3 { margin-top: 0; color: var(--primary); font-size: 18px; }
+        .modal-btn { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; }
+        .modal-btn.btn-done { background-color: var(--success); }
+        .modal-btn.btn-missed { background-color: var(--accent); }
+        .modal-btn.btn-freeze { background-color: var(--freeze); }
+        .modal-btn.btn-recovery { background-color: var(--recovery); }
+        .modal-btn.btn-clear { background-color: #95a5a6; }
+        .modal-btn.btn-gift { background-color: #2980b9; }
+        .modal-btn:hover { opacity: 0.9; }
+
+        .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+
+        /* Tabela wyników */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 14px; }
+        th, td { border: 1px solid #dfe4ea; padding: 10px 12px; text-align: left; }
+        th { background-color: #f1f2f6; color: var(--primary); font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+<body>
 
-    <!-- Ekran logowania / wyboru użytkownika -->
-    <div id="login-screen" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center">
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Wyzwanie 30 Dni</h2>
-            <p class="text-slate-600 mb-6">Wpisz swoje imię lub wybierz z listy, aby dołączyć do wyzwania.</p>
-            <input type="text" id="username-input" placeholder="Twoje imię..." class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 text-lg text-center">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-md shadow-blue-500/20">Wejdź do wyzwania</button>
+    <div class="container">
+        <!-- Sekcja Logowania -->
+        <div id="loginSection" class="section active">
+            <h1>Hiszpańskie Wyzwanie</h1>
+            <p>Wpisz swoje imię, aby otworzyć panel:</p>
+            <input type="text" id="usernameInput" placeholder="Twoje imię...">
+            <button onclick="handleLogin()">Wejdź do wyzwania</button>
+        </div>
+
+        <!-- Sekcja Panelu Głównego -->
+        <div id="dashboardSection" class="section">
+            <h1 id="welcomeUser">Witaj</h1>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    Zamrożenia
+                    <span id="freezesCount">2</span>/<span id="maxFreezesCount">2</span>
+                </div>
+                <div class="stat-card">
+                    Nadrobienia
+                    <span id="recoveriesCount">2</span>/2
+                </div>
+            </div>
+
+            <!-- Kafelki Nagród i Akcji -->
+            <div class="awards-container">
+                <div class="award-card">
+                    <h3>🏆 Campeón de la Disciplina</h3>
+                    <p id="championAward">-</p>
+                </div>
+                <div class="award-card" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);">
+                    <h3>🔥 Mejor Racha</h3>
+                    <p id="streakAward">-</p>
+                </div>
+                <button class="award-card action-card" onclick="openGiftModal()">
+                    <h3>🎁 Prezent</h3>
+                    <p>Podaruj zamrożenie</p>
+                </button>
+            </div>
+
+            <h2>Twój Miesięczny Postęp (Dni 1-30)</h2>
+            <div id="daysGrid" class="grid"></div>
+
+            <div style="margin-top: 30px;">
+                <h2>Tablica Wyników</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Miejsce</th>
+                                <th>Użytkownik</th>
+                                <th>Ukończone</th>
+                                <th>Zamrożenia</th>
+                                <th>Nadrobienia</th>
+                                <th>Passa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody">
+                            <!-- Wypełniane dynamicznie -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Główna zawartość aplikacji -->
-    <div class="max-w-4xl w-full mx-auto p-4 sm:p-6 flex-grow">
-        <!-- Nagłówek -->
-        <header class="flex flex-col sm:flex-row justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6 gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-slate-900">Witaj, <span id="display-username" class="text-blue-600"></span>!</h1>
-                <p class="text-sm text-slate-500">Śledź swoje postępy i walcz o cel.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 text-center">
-                    <span class="block text-xs font-semibold text-blue-600 uppercase">Zamrożenia</span>
-                    <span id="stat-freezes" class="font-bold text-blue-900">-/-</span>
-                </div>
-                <div class="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 text-center">
-                    <span class="block text-xs font-semibold text-emerald-600 uppercase">Nadrobienia</span>
-                    <span id="stat-recoveries" class="font-bold text-emerald-900">-/-</span>
-                </div>
-                <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-xl transition-colors font-medium">Zmień użytkownika</button>
-            </div>
-        </header>
-
-        <!-- Sekcja akcji / podarowania zamrożenia -->
-        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
-            <h2 class="text-base font-bold text-slate-900 mb-3">Strefa Społeczności</h2>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <select id="gift-target-user" class="flex-grow px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm">
-                    <option value="">Wybierz użytkownika, któremu chcesz podarować zamrożenie...</option>
-                </select>
-                <button onclick="sendGift()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">Podaruj zamrożenie</button>
-            </div>
-        </section>
-
-        <!-- Siatka dni (1-30) -->
-        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
-            <h2 class="text-base font-bold text-slate-900 mb-4">Twój Kalendarz Wyzwania (30 Dni)</h2>
-            <div id="days-grid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-3">
-                <!-- Generowane dynamicznie przez JS -->
-            </div>
-        </section>
-
-        <!-- Tabela wyników (Leaderboard) -->
-        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-base font-bold text-slate-900">Tabela Wyników</h2>
-                <button onclick="loadLeaderboard()" class="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">Odśwież ranking</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-100 text-slate-400 font-medium">
-                            <th class="py-3 px-3">Miejsce</th>
-                            <th class="py-3 px-3">Użytkownik</th>
-                            <th class="py-3 px-3">Campeón de la disciplina</th>
-                            <th class="py-3 px-3">Zamrożenia</th>
-                            <th class="py-3 px-3">Nadrobienia</th>
-                            <th class="py-3 px-3">Mejor racha</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        <!-- Wypełniane dynamicznie -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <!-- Modal wyboru statusu dnia -->
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modalTitle">Wybierz status</h3>
+            <button class="modal-btn btn-done" onclick="setStatus('done')">✅ Zaliczone</button>
+            <button class="modal-btn btn-missed" onclick="setStatus('missed')">❌ Nie zaliczono</button>
+            <button class="modal-btn btn-freeze" onclick="setStatus('frozen')">❄️ Zamrożenie</button>
+            <button class="modal-btn btn-recovery" onclick="setStatus('recovered')">🔥 Nadrobiono</button>
+            <button class="modal-btn btn-clear" onclick="setStatus('none')">🗑️ Wyczyść status</button>
+            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal('statusModal')">Zamknij</button>
+        </div>
     </div>
 
-    <!-- Stopka -->
-    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-200 mt-6">
-        Wyzwanie 30 Dni &copy; 2026
-    </footer>
+    <!-- Modal darowania zamrożenia -->
+    <div id="giftModal" class="modal-overlay">
+        <div class="modal">
+            <h3>🎁 Podaruj zamrożenie</h3>
+            <p style="font-size: 14px; color: #555;">Wybierz uczestnika, któremu chcesz przekazać zamrożenie:</p>
+            <select id="giftUserSelect" class="user-list-select">
+                <!-- Wypełniane dynamicznie -->
+            </select>
+            <button class="modal-btn btn-gift" onclick="sendGiftFreeze()">Wyślij prezent</button>
+            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal('giftModal')">Zamknij</button>
+        </div>
+    </div>
 
-    <!-- Skrypt obsługujący logikę frontendu -->
     <script>
-        // ADRES URL DO TWOJEGO WEBAKTU GOOGLE APPS SCRIPT
+        // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WEB APP
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCKnU0HxIOwCS-nS-0pbNAE4uYShjflasrLOG0IwMsKn7UABfdVvT78f_QHSoGDPRI/exec"; 
 
-        let currentUser = localStorage.getItem("challenge_username") || "";
-
-        window.onload = function() {
-            if (currentUser) {
-                document.getElementById("login-screen").classList.add("hidden");
-                document.getElementById("display-username").innerText = currentUser;
-                fetchAllData();
-            } else {
-                document.getElementById("login-screen").classList.remove("hidden");
-            }
-        };
+        let currentUser = "";
+        let userData = {};
+        let selectedDay = null;
+        let allLeaderboardUsers = [];
 
         function handleLogin() {
-            const input = document.getElementById("username-input").value.trim();
+            const input = document.getElementById('usernameInput').value.trim();
             if (!input) {
-                alert("Wpisz poprawne imię!");
+                alert("Wpisz swoje imię!");
                 return;
             }
             currentUser = input;
-            localStorage.setItem("challenge_username", currentUser);
-            document.getElementById("login-screen").classList.add("hidden");
-            document.getElementById("display-username").innerText = currentUser;
-            fetchAllData();
-        }
-
-        function logout() {
-            localStorage.removeItem("challenge_username");
-            currentUser = "";
-            location.reload();
-        }
-
-        function fetchAllData() {
             loadUserData();
-            loadLeaderboard();
         }
 
-        function loadUserData() {
-            fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        renderDays(data.days);
-                        document.getElementById("stat-freezes").innerText = `${data.freezesCount}/${data.maxFreezes}`;
-                        document.getElementById("stat-recoveries").innerText = `${data.recoveriesCount}/2`;
-                    }
-                })
-                .catch(err => console.error("Błąd pobierania danych użytkownika:", err));
+        async function loadUserData() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('dashboardSection').classList.add('active');
+            document.getElementById('welcomeUser').innerText = `Witaj, ${currentUser}!`;
+
+            try {
+                const [userResponse, leaderboardResponse] = await Promise.all([
+                    fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`),
+                    fetch(`${SCRIPT_URL}?action=getLeaderboard`)
+                ]);
+
+                const userResult = await userResponse.json();
+                const leaderboardResult = await leaderboardResponse.json();
+                
+                if (userResult.success) {
+                    userData = userResult.days || {};
+                    document.getElementById('freezesCount').innerText = userResult.freezesCount;
+                    document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
+                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
+                    renderGrid();
+                }
+
+                if (leaderboardResult.success) {
+                    allLeaderboardUsers = leaderboardResult.data;
+                    renderLeaderboard(leaderboardResult.data);
+                }
+
+            } catch (err) {
+                console.error('Błąd podczas ładowania danych:', err);
+            }
         }
 
-        function renderDays(daysData) {
-            const grid = document.getElementById("days-grid");
-            grid.innerHTML = "";
+        function renderGrid() {
+            const grid = document.getElementById('daysGrid');
+            grid.innerHTML = '';
 
             for (let i = 1; i <= 30; i++) {
-                const status = daysData[i] || "none";
-                let bgClass = "bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200";
-
-                if (status === "done") {
-                    bgClass = "bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-500/20";
-                } else if (status === "frozen") {
-                    bgClass = "bg-sky-400 text-white border-sky-500 shadow-sm shadow-sky-400/20";
-                } else if (status === "recovered") {
-                    bgClass = "bg-amber-500 text-white border-amber-600 shadow-sm shadow-amber-500/20";
+                const box = document.createElement('div');
+                box.className = 'day-box';
+                box.innerText = i;
+                
+                const status = userData[i];
+                if (status) {
+                    box.classList.add(status);
                 }
 
-                const btn = document.createElement("button");
-                btn.className = `h-14 rounded-xl font-bold flex flex-col items-center justify-center border transition-all text-xs ${bgClass}`;
-                btn.innerHTML = `<span>${i}</span>`;
-                btn.onclick = () => cycleDayStatus(i, status);
-                grid.appendChild(btn);
+                box.onclick = () => openStatusModal(i);
+                grid.appendChild(box);
             }
         }
 
-        function cycleDayStatus(day, currentStatus) {
-            let nextStatus = "done";
-            if (currentStatus === "done") nextStatus = "frozen";
-            else if (currentStatus === "frozen") nextStatus = "recovered";
-            else if (currentStatus === "recovered") nextStatus = "none";
-            else if (currentStatus === "none") nextStatus = "done";
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "updateDay",
-                    user: currentUser,
-                    day: day,
-                    status: nextStatus
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    fetchAllData();
-                } else {
-                    alert(data.message || "Wystąpił błąd");
-                }
-            })
-            .catch(err => console.error("Błąd aktualizacji dnia:", err));
+        function openStatusModal(day) {
+            selectedDay = day;
+            document.getElementById('modalTitle').innerText = `Dzień ${day} - Wybierz status`;
+            document.getElementById('statusModal').classList.add('active');
         }
 
-        function loadLeaderboard() {
-            fetch(`${SCRIPT_URL}?action=getLeaderboard`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const tbody = document.getElementById("leaderboard-body");
-                        tbody.innerHTML = "";
-                        
-                        const select = document.getElementById("gift-target-user");
-                        const currentSelectedVal = select.value;
-                        select.innerHTML = '<option value="">Wybierz użytkownika, któremu chcesz podarować zamrożenie...</option>';
+        function openGiftModal() {
+            const select = document.getElementById('giftUserSelect');
+            select.innerHTML = '';
 
-                        data.data.forEach((row, index) => {
-                            const tr = document.createElement("tr");
-                            tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
-                            tr.innerHTML = `
-                                <td class="py-3 px-3 font-semibold text-slate-500">#${index + 1}</td>
-                                <td class="py-3 px-3 font-medium text-slate-800">${row.user}</td>
-                                <td class="py-3 px-3 font-bold text-slate-900">${row.done}</td>
-                                <td class="py-3 px-3 text-slate-600">${row.freezes}</td>
-                                <td class="py-3 px-3 text-slate-600">${row.recoveries}</td>
-                                <td class="py-3 px-3 font-semibold text-blue-600">${row.streak} dni</td>
-                            `;
-                            tbody.appendChild(tr);
+            // Filtrujemy, aby nie pokazywać siebie na liście obdarowywanych
+            const filteredUsers = allLeaderboardUsers.filter(u => u.user.toLowerCase() !== currentUser.toLowerCase());
 
-                            if (row.user !== currentUser) {
-                                const opt = document.createElement("option");
-                                opt.value = row.user;
-                                opt.textContent = row.user;
-                                select.appendChild(opt);
+            if (filteredUsers.length === 0) {
+                select.innerHTML = '<option value="">Brak innych uczestników</option>';
+            } else {
+                filteredUsers.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.user;
+                    opt.innerText = u.user;
+                    select.appendChild(opt);
+                });
+            }
+
+            document.getElementById('giftModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'statusModal') selectedDay = null;
+        }
+
+        function renderLeaderboard(data) {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+            
+            let bestDone = -1;
+            let championName = "Brak";
+            
+            let bestStreak = -1;
+            let streakLeaderName = "Brak";
+
+            data.forEach((row, index) => {
+                if (row.done > bestDone) {
+                    bestDone = row.done;
+                    championName = `${row.user} (${row.done} dni)`;
+                } else if (row.done === bestDone && bestDone > 0) {
+                    championName += `, ${row.user}`;
+                }
+
+                if (row.streak > bestStreak) {
+                    bestStreak = row.streak;
+                    streakLeaderName = `${row.user} (${row.streak} z rzędu)`;
+                } else if (row.streak === bestStreak && bestStreak > 0) {
+                    streakLeaderName += `, ${row.user}`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${index + 1}</td>
+                    <td><b>${row.user}</b></td>
+                    <td>${row.done}</td>
+                    <td>${row.freezes}</td>
+                    <td>${row.recoveries}</td>
+                    <td>${row.streak} dni</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('championAward').innerText = bestDone > 0 ? championName : "Brak danych";
+            document.getElementById('streakAward').innerText = bestStreak > 0 ? streakLeaderName : "Brak danych";
+        }
+
+        async function sendGiftFreeze() {
+            const targetUser = document.getElementById('giftUserSelect').value;
+            if (!targetUser) {
+                alert("Wybierz użytkownika!");
+                return;
+            }
+
+            closeModal('giftModal');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'giftFreeze',
+                        fromUser: currentUser,
+                        toUser: targetUser
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadUserData(); // Odświeżamy dane po wysłaniu prezentu
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                console.error('Błąd połączenia:', err);
+                alert("Błąd połączenia z serwerem.");
+            }
+        }
+
+        async function setStatus(nextStatus) {
+            if (!selectedDay) return;
+            const day = selectedDay;
+            const previousStatus = userData[day];
+            closeModal('statusModal');
+
+            if (nextStatus === 'none') {
+                delete userData[day];
+            } else {
+                userData[day] = nextStatus;
+            }
+            renderGrid();
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateDay',
+                        user: currentUser,
+                        day: day,
+                        status: nextStatus
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    if (result.freezesCount !== undefined) {
+                        document.getElementById('freezesCount').innerText = result.freezesCount;
+                    }
+                    if (result.maxFreezes !== undefined) {
+                        document.getElementById('maxFreezesCount').innerText = result.maxFreezes;
+                    }
+
+                    fetch(`${SCRIPT_URL}?action=getLeaderboard`)
+                        .then(res => res.json())
+                        .then(leaderboardResult => {
+                            if (leaderboardResult.success) {
+                                allLeaderboardUsers = leaderboardResult.data;
+                                renderLeaderboard(leaderboardResult.data);
                             }
                         });
-
-                        if (currentSelectedVal) {
-                            select.value = currentSelectedVal;
-                        }
-                    }
-                })
-                .catch(err => console.error("Błąd pobierania rankingu:", err));
-        }
-
-        function sendGift() {
-            const targetUser = document.getElementById("gift-target-user").value;
-            if (!targetUser) {
-                alert("Wybierz użytkownika z listy!");
-                return;
-            }
-
-            if (!confirm(`Czy na pewno chcesz podarować zamrożenie użytkownikowi ${targetUser}?`)) {
-                return;
-            }
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "giftFreeze",
-                    fromUser: currentUser,
-                    toUser: targetUser
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || "Zamrożenie zostało pomyślnie podarowane!");
-                    document.getElementById("gift-target-user").value = "";
-                    fetchAllData();
                 } else {
-                    alert(data.message || "Nie udało się podarować zamrożenia.");
+                    if (previousStatus) {
+                        userData[day] = previousStatus;
+                    } else {
+                        delete userData[day];
+                    }
+                    renderGrid();
+                    loadUserData(); 
+                    alert(result.message);
                 }
-            })
-            .catch(err => console.error("Błąd darowania zamrożenia:", err));
+            } catch (err) {
+                console.error('Błąd połączenia z serwerem:', err);
+                if (previousStatus) {
+                    userData[day] = previousStatus;
+                } else {
+                    delete userData[day];
+                }
+                renderGrid();
+                alert("Błąd połączenia z serwerem. Zmiana została cofnięta.");
+            }
         }
     </script>
 </body>
