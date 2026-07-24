@@ -488,7 +488,7 @@
             });
         }
 
-       async function loadUserData() {
+      async function loadUserData() {
             document.getElementById('loginSection').classList.remove('active');
             document.getElementById('dashboardSection').classList.add('active');
             document.getElementById('welcomeUser').innerText = `Witaj, ${currentUser}!`;
@@ -502,12 +502,17 @@
                 const userResult = await userResponse.json();
                 const leaderboardResult = await leaderboardResponse.json();
                 
+                console.log("Odebrane dane użytkownika:", userResult); // <--- To pokaże w konsoli F12, co dokładnie przychodzi z serwera
+
                 // 1. Obsługa danych użytkownika
                 if (userResult.success) {
                     userData = userResult.days || {};
-                    document.getElementById('freezesCount').innerText = userResult.freezesCount;
-                    document.getElementById('maxFreezesLimit').innerText = userResult.maxLimit;
-                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
+                    
+                    // Bezpieczne wstawianie wartości do HTML
+                    document.getElementById('freezesCount').innerText = (userResult.freezesCount !== undefined) ? userResult.freezesCount : 0;
+                    document.getElementById('maxFreezesLimit').innerText = (userResult.maxLimit !== undefined) ? userResult.maxLimit : 2;
+                    document.getElementById('recoveriesCount').innerText = (userResult.recoveriesCount !== undefined) ? userResult.recoveriesCount : 2;
+                    
                     renderGrid();
                 }
 
