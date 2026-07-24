@@ -30,7 +30,7 @@
         .stat-card { background: #ecf0f1; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 15px; color: #34495e; }
         .stat-card span { display: block; font-size: 22px; color: var(--primary); margin-top: 5px; }
 
-        /* Kafelki nagród */
+        /* Kafelki Nagród */
         .awards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .award-card { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 18px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3); }
         .award-card h3 { margin: 0 0 8px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
@@ -262,7 +262,27 @@
         async function setStatus(nextStatus) {
             if (!selectedDay) return;
             const day = selectedDay;
+            const previousStatus = userData[day]; // Zapisujemy stan przed zmianą (w razie cofnięcia błędu)
             closeModal();
+
+            // --- NATYCHMIASTOWA (OPTYMISTYCZNA) AKTUALIZACJA INTERFEJSU ---
+            if (nextStatus === 'none') {
+                delete userData[day];
+            } else {
+                userData[day] = nextStatus;
+            }
+            renderGrid();
+
+            // Lokalnie przeliczamy liczniki, żeby użytkownik nie czekał
+            let tempFreezes = 0;
+            let tempRecoveries = 0;
+            for (let d in userData) {
+                if (userData[d] === 'frozen') tempFreezes++;
+                if (userData[d] === 'recovered') tempRecoveries++;
+            }
+            document.getElementById('freezesCount').innerText = 2 - tempFreezes;
+            document.getElementById('recoveriesCount').innerText = 2 - tempRecoveries;
+            // -------------------------------------------------------------
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -277,12 +297,7 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    if (nextStatus === 'none') {
-                        delete userData[day];
-                    } else {
-                        userData[day] = nextStatus;
-                    }
-                    
+                    // Aktualizujemy dokładnymi danymi z serwera, jeśli przyszły
                     if (result.freezesCount !== undefined) {
                         document.getElementById('freezesCount').innerText = result.freezesCount;
                     }
@@ -290,8 +305,7 @@
                         document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
                     }
 
-                    renderGrid();
-                    
+                    // Odśwież ranking w tle
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
                         .then(leaderboardResult => {
@@ -300,10 +314,27 @@
                             }
                         });
                 } else {
+                    // Jeśli serwer odrzucił (np. limit zamrożeń), cofamy stan lokalny i wyświetlamy błąd
+                    if (previousStatus) {
+                        userData[day] = previousStatus;
+                    } else {
+                        delete userData[day];
+                    }
+                    renderGrid();
+                    // Przywracamy liczniki z serwera/poprzednie
+                    loadUserData(); 
                     alert(result.message);
                 }
             } catch (err) {
                 console.error('Błąd połączenia z serwerem:', err);
+                // W razie braku połączenia cofamy zmianę
+                if (previousStatus) {
+                    userData[day] = previousStatus;
+                } else {
+                    delete userData[day];
+                }
+                renderGrid();
+                alert("Błąd połączenia z serwerem. Zmiana została cofnięta.");
             }
         }
     </script>
