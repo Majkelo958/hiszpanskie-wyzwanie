@@ -3,492 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiszpańskie Wyzwanie 30 Dni</title>
+    <title>Hiszpańskie Wyzwanie</title>
     <style>
-        :root {
-            --primary: #d97706;
-            --primary-hover: #b45309;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --done: #22c55e;
-            --frozen: #3b82f6;
-            --recovered: #a855f7;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: var(--text-color);
-        }
-
-        .login-section, .dashboard {
-            display: none;
-        }
-
-        .login-section.active, .dashboard.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        input, button {
-            padding: 12px 16px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .day-box {
-            aspect-ratio: 1;
-            background: #e2e8f0;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 18px;
-            position: relative;
-            transition: transform 0.1s, background 0.2s;
-            user-select: none;
-        }
-
-        .day-box:hover {
-            transform: scale(1.05);
-        }
-
-        .day-box.done { background-color: var(--done); color: white; }
-        .day-box.frozen { background-color: var(--frozen); color: white; }
-        .day-box.recovered { background-color: var(--recovered); color: white; }
-        .day-box.missed { background-color: #ef4444; color: white; }
-
-        .day-label {
-            font-size: 11px;
-            opacity: 0.9;
-        }
-
-        /* Modal do wyboru statusu */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .modal {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .modal h3 {
-            margin-top: 0;
-            text-align: center;
-        }
-
-        .btn-done { background-color: var(--done); }
-        .btn-frozen { background-color: var(--frozen); }
-        .btn-recovered { background-color: var(--recovered); }
-        .btn-missed { background-color: #ef4444; }
-        .btn-missed:hover { background-color: #dc2626; }
-        .btn-clear { background-color: #64748b; }
-
-        .leaderboard-section {
-            margin-top: 40px;
-            border-top: 2px solid #f1f5f9;
-            padding-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background-color: #f8fafc;
-        }
-        
-        .loader {
-            text-align: center;
-            font-style: italic;
-            color: #64748b;
-            display: none;
-            margin: 10px 0;
-        }
-        
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .section { display: none; }
+        .section.active { display: block; }
+        h1, h2 { color: #2c3e50; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; margin-top: 20px; }
+        .day-box { aspect-ratio: 1; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; background: #fff; transition: all 0.2s; }
+        .day-box.done { background-color: #2ecc71; color: white; border-color: #27ae60; }
+        .day-box.frozen { background-color: #3498db; color: white; border-color: #2980b9; }
+        .day-box.recovered { background-color: #e67e22; color: white; border-color: #d35400; }
+        .day-box.missed { background-color: #e74c3c; color: white; border-color: #c0392b; }
+        .stats-panel { display: flex; justify-content: space-between; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        input, button { padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; margin-right: 10px; }
+        button { background-color: #3498db; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #2980b9; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🇪🇸 Hiszpańskie Wyzwanie 30 Dni</h1>
-
-        <!-- SEKJA LOGOWANIA -->
-        <div id="loginSection" class="login-section active">
-            <h2>Wpisz swoje imię, aby rozpocząć</h2>
-            <div class="form-group">
-                <input type="text" id="usernameInput" placeholder="Twoje imię lub nick...">
-                <button onclick="handleLogin()">Wejdź do wyzwania</button>
-            </div>
+        <!-- Sekcja Logowania -->
+        <div id="loginSection" class="section active">
+            <h1>Hiszpańskie Wyzwanie</h1>
+            <p>Wpisz swoje imię, aby dołączyć:</p>
+            <input type="text" id="usernameInput" placeholder="Twoje imię...">
+            <button onclick="handleLogin()">Wejdź</button>
         </div>
 
-        <!-- DASHBOARD UŻYTKOWNIKA -->
-        <div id="dashboardSection" class="dashboard">
-            <h2 id="welcomeUser"></h2>
+        <!-- Sekcja Panelu Głównego -->
+        <div id="dashboardSection" class="section">
+            <h1 id="welcomeUser">Witaj</h1>
             
-            <div class="stats">
-                <span>Zamrożenia: <span id="freezesCount">0</span>/<span id="maxFreezesLimit">2</span></span>
+            <div class="stats-panel">
+                <div>Zamrożenia: <span id="freezesCount">0</span>/<span id="maxFreezesLimit">2</span></div>
                 <div>Nadrobienia: <span id="recoveriesCount">2</span>/2</div>
-                <!-- OSOBNY PRZYCISK DO PODAROWANIA ZAMROŻENIA -->
-<button onclick="promptGiftFreezeGlobal()" style="margin-top: 10px; background-color: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-    🎁 Podaruj zamrożenie komuś
-</button>
-            </div>
-            
-
-            <div class="loader" id="loader">Zapisywanie danych...</div>
-
-
-            <div class="grid" id="daysGrid">
-                <div id="gridLoader" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b; font-weight: bold;">Ładowanie wyzwania...</div>
             </div>
 
-            <!-- Pudełka z wyróżnieniami (Campeón i Racha) -->
-            <div class="awards-container" style="display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;">
-                <div class="award-card" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 8px; text-align: center; flex: 1; min-width: 200px;">
-                    <div style="font-size: 24px; margin-bottom: 5px;">🏆</div>
-                    <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Campeón de la disciplina</div>
-                    <div id="campeonName" style="font-size: 16px; font-weight: bold; color: #1e293b; margin-top: 5px;">Ładowanie...</div>
-                </div>
-                
-                <div class="award-card" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px 20px; border-radius: 8px; text-align: center; flex: 1; min-width: 200px;">
-                    <div style="font-size: 24px; margin-bottom: 5px;">🔥</div>
-                    <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold;">Mejor racha</div>
-                    <div id="mejorRachaName" style="font-size: 16px; font-weight: bold; color: #1e293b; margin-top: 5px;">Ładowanie...</div>
-                </div>
-            </div>
-           <!-- <button onclick="logout()" style="background-color: #64748b; width: 100%;">Zmień użytkownika</button>-->
+            <h2>Twój Miesięczny Postęp (Dni 1-30)</h2>
+            <div id="daysGrid" class="grid"></div>
 
-            <!-- TABLICA WYNIKÓW -->
-            <div class="leaderboard-section">
-                <h2>🏆 Tablica Wyników</h2>
+            <div style="margin-top: 30px;">
+                <h2>Tablica Wyników</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Miejsce</th>
-                            <th>Uczestnik</th>
-                            <th>Dni nauki</th>
+                            <th>Użytkownik</th>
+                            <th>Ukończone</th>
                             <th>Zamrożenia</th>
                             <th>Nadrobienia</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboardBody">
-                        <!-- Generowane dynamicznie -->
+                        <!-- Tutaj wpadają dane z rankingu -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    
-  <!-- MODAL WYBORU STATUSU -->
-<div class="modal-overlay" id="statusModal">
-    <div class="modal">
-        <h3 id="modalTitle">Wybierz status</h3>
-        <button class="btn-done" onclick="setStatusAndSend('done')">✅ Uczyłem się</button>
-        <button class="btn-missed" onclick="setStatusAndSend('missed')">❌ Nie uczyłem się</button>
-        <button class="btn-frozen" onclick="setStatusAndSend('frozen')">❄️ Zamrożone</button>
-        <!-- NOWY PRZYCISK DO PRZEKAZANIA ZAMROŻENIA -->
-        <button class="btn-frozen" style="background-color: #FF7F50;" onclick="promptGiftFreeze()">🎁 Podaruj zamrożenie komuś</button>
-        <button class="btn-recovered" onclick="setStatusAndSend('recovered')">🔥 Nadrobione</button>
-        <button class="btn-clear" onclick="setStatusAndSend('none')">🗑️ Usuń status</button>
-        <button onclick="closeModal()" style="background: #cbd5e1; color: #1e293b; margin-top: 10px;">Anuluj</button>
-    </div>
-</div>
-
     <script>
+        // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WPROWADZENIA WEB APP
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj_2qWMBHICN29sjH38r0ApGgXR67qS9jbhC0qxrRyK2ovVKZnME3IhL3ZehWSD-wY/exec"; 
 
-        // TUTAJ WKLEJAMY NASZĄ NOWĄ FUNKCJĘ:
-    function promptGiftFreezeGlobal() {
-        const targetUser = prompt("Wpisz imię/nick osoby, której chcesz podarować zamrożenie:");
-        if (!targetUser || !targetUser.trim()) return;
-
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'giftFreezeGlobal',
-                fromUser: currentUser,
-                toUser: targetUser.trim()
-            })
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert(`Pomyślnie podarowano zamrożenie dla użytkownika ${targetUser.trim()}!`);
-                loadUserData(); // Odświeżenie danych na ekranie
-            } else {
-                alert('Błąd: ' + result.message);
-            }
-        })
-        .catch(err => {
-            alert('Błąd połączenia z serwerem: ' + err);
-        });
-    }
-
-        function promptGiftFreeze() {
-    const dayToGift = activeDay;
-    closeModal();
-
-    if (!dayToGift) {
-        alert('Błąd: Nie wybrano dnia!');
-        return;
-    }
-
-    const targetUser = prompt("Wpisz imię/nick osoby, której chcesz podarować zamrożenie:");
-    if (!targetUser || !targetUser.trim()) return;
-
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'giftFreeze',
-            fromUser: currentUser,
-            toUser: targetUser.trim(),
-            day: dayToGift
-        })
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            alert(`Pomyślnie podarowano zamrożenie dla użytkownika ${targetUser.trim()}!`);
-            loadUserData(); // Odświeżenie widoku
-        } else {
-            alert('Błąd: ' + result.message);
-        }
-    })
-    .catch(err => {
-        alert('Błąd połączenia z serwerem: ' + err);
-    });
-}
-        
-        // TUTAJ WSTAW SWÓJ URL DO WEB APP Z GOOGLE APPS SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBmY-NmTI1ujPdTaXBYyBtLuo0wIv41Q1ZniIB1SW902bZuASn1SMFcmiEJWwAmtM-/exec";
-
-        let currentUser = localStorage.getItem('hs_user') || '';
+        let currentUser = "";
         let userData = {};
-        let activeDay = null;
-
-        window.onload = function() {
-            if (currentUser) {
-                document.getElementById('usernameInput').value = currentUser;
-                loadUserData();
-            }
-        };
 
         function handleLogin() {
             const input = document.getElementById('usernameInput').value.trim();
             if (!input) {
-                alert('Proszę wpisać imię!');
+                alert("Wpisz imię!");
                 return;
             }
             currentUser = input;
-            localStorage.setItem('hs_user', currentUser);
             loadUserData();
         }
 
-        function logout() {
-            localStorage.removeItem('hs_user');
-            currentUser = '';
-            document.getElementById('dashboardSection').classList.remove('active');
-            document.getElementById('loginSection').classList.add('active');
-        }
-
-       function renderGrid() {
-            const grid = document.getElementById('daysGrid');
-            grid.innerHTML = ''; // To automatycznie usuwa loader, gdy dane są gotowe
-
-            for (let i = 1; i <= 30; i++) {
-                const status = userData[i] || '';
-                const box = document.createElement('div');
-                box.className = `day-box ${status}`;
-                box.innerHTML = `<span>${i}</span><span class="day-label">${getStatusLabel(status)}</span>`;
-                box.onclick = () => openModal(i);
-                grid.appendChild(box);
-            }
-        }
-
-        function getStatusLabel(status) {
-            if (status === 'done') return 'Zaliczone';
-            if (status === 'missed') return 'Niezaliczone';
-            if (status === 'frozen') return 'Zamrożone';
-            if (status === 'recovered') return 'Nadrobione';
-            return '';
-        }
-
-        function openModal(day) {
-            activeDay = day;
-            document.getElementById('modalTitle').innerText = `Dzień ${day}`;
-            document.getElementById('statusModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            activeDay = null;
-            document.getElementById('statusModal').style.display = 'none';
-        }
-
-        function setStatusAndSend(status) {
-            const dayToUpdate = activeDay;
-            closeModal();
-            
-            if (!dayToUpdate) {
-                alert('Błąd: Nie wybrano dnia!');
-                return;
-            }
-
-            // 1. Walidacja limitów po stronie klienta (zanim cokolwiek zmienimy)
-            if (status === 'frozen') {
-                let currentFreezes = 0;
-                for (let d in userData) {
-                    if (userData[d] === 'frozen' && parseInt(d) !== parseInt(dayToUpdate)) {
-                        currentFreezes++;
-                    }
-                }
-                if (currentFreezes >= 2) {
-                    alert('Przekroczono limit 2 zamrożeń!');
-                    return;
-                }
-            }
-
-            if (status === 'recovered') {
-                let currentRecoveries = 0;
-                for (let d in userData) {
-                    if (userData[d] === 'recovered' && parseInt(d) !== parseInt(dayToUpdate)) {
-                        currentRecoveries++;
-                    }
-                }
-                if (currentRecoveries >= 2) {
-                    alert('Przekroczono limit 2 nadrobień!');
-                    return;
-                }
-            }
-
-            // 2. Jeśli limity są OK, robimy optymistyczną zmianę na ekranie
-            const previousStatus = userData[dayToUpdate];
-            if (status === 'none') {
-                delete userData[dayToUpdate];
-            } else {
-                userData[dayToUpdate] = status;
-            }
-            renderGrid();
-
-            // 3. Wysłanie danych do Google Sheets w tle
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'updateDay',
-                    user: currentUser,
-                    day: dayToUpdate,
-                    status: status
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    document.getElementById('freezesCount').innerText = result.freezesCount;
-                    document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
-                    loadLeaderboard();
-                } else {
-                    // Awaryjne cofnięcie, gdyby serwer zwrócił inny błąd
-                    if (previousStatus) {
-                        userData[dayToUpdate] = previousStatus;
-                    } else {
-                        delete userData[dayToUpdate];
-                    }
-                    renderGrid();
-                    alert('Błąd serwera: ' + result.message);
-                }
-            })
-            .catch(err => {
-                if (previousStatus) {
-                    userData[dayToUpdate] = previousStatus;
-                } else {
-                    delete userData[dayToUpdate];
-                }
-                renderGrid();
-                alert('Błąd połączenia z serwerem: ' + err);
-            });
-        }
-
-      async function loadUserData() {
+        async function loadUserData() {
             document.getElementById('loginSection').classList.remove('active');
             document.getElementById('dashboardSection').classList.add('active');
             document.getElementById('welcomeUser').innerText = `Witaj, ${currentUser}!`;
@@ -502,21 +99,16 @@
                 const userResult = await userResponse.json();
                 const leaderboardResult = await leaderboardResponse.json();
                 
-                console.log("Odebrane dane użytkownika:", userResult); // <--- To pokaże w konsoli F12, co dokładnie przychodzi z serwera
-
-                // 1. Obsługa danych użytkownika
                 if (userResult.success) {
                     userData = userResult.days || {};
                     
-                    // Bezpieczne wstawianie wartości do HTML
-                    document.getElementById('freezesCount').innerText = (userResult.freezesCount !== undefined) ? userResult.freezesCount : 0;
-                    document.getElementById('maxFreezesLimit').innerText = (userResult.maxLimit !== undefined) ? userResult.maxLimit : 2;
-                    document.getElementById('recoveriesCount').innerText = (userResult.recoveriesCount !== undefined) ? userResult.recoveriesCount : 2;
+                    document.getElementById('freezesCount').innerText = userResult.freezesCount ?? 0;
+                    document.getElementById('maxFreezesLimit').innerText = userResult.maxLimit ?? 2;
+                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount ?? 2;
                     
                     renderGrid();
                 }
 
-                // 2. Obsługa tablicy wyników i nagród
                 if (leaderboardResult.success) {
                     const tbody = document.getElementById('leaderboardBody');
                     tbody.innerHTML = '';
@@ -532,8 +124,6 @@
                         `;
                         tbody.appendChild(tr);
                     });
-
-                    updateAwards(leaderboardResult.data);
                 }
 
             } catch (err) {
@@ -541,46 +131,92 @@
             }
         }
 
-        async function loadLeaderboard() {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getLeaderboard`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    const tbody = document.getElementById('leaderboardBody');
-                    tbody.innerHTML = '';
-                    
-                    result.data.forEach((row, index) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>#${index + 1}</td>
-                            <td>${row.user}</td>
-                            <td><b>${row.done}</b></td>
-                            <td>${row.freezes}</td>
-                            <td>${row.recoveries}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+        function renderGrid() {
+            const grid = document.getElementById('daysGrid');
+            grid.innerHTML = '';
 
-                    // Aktualizacja wyróżnień Campeón i Mejor racha
-                    updateAwards(result.data);
+            for (let i = 1; i <= 30; i++) {
+                const box = document.createElement('div');
+                box.className = 'day-box';
+                box.innerText = i;
+                
+                const status = userData[i];
+                if (status) {
+                    box.classList.add(status);
                 }
-            } catch (err) {
-                console.error('Błąd tablicy wyników', err);
+
+                box.onclick = () => cycleDayStatus(i);
+                grid.appendChild(box);
             }
         }
 
-        // Funkcja obliczająca i wyświetlająca nagrody
-        function updateAwards(leaderboardData) {
-            if (!leaderboardData || leaderboardData.length === 0) return;
+        async function cycleDayStatus(day) {
+            const currentStatus = userData[day] || 'none';
+            let nextStatus = 'none';
 
-            // Campeón de la disciplina (najwięcej zaliczonych dni)
-            let campeon = leaderboardData.reduce((prev, current) => (current.done > prev.done) ? current : prev);
-            document.getElementById('campeonName').innerText = `${campeon.user} (${campeon.done} dni)`;
+            if (currentStatus === 'none') nextStatus = 'done';
+            else if (currentStatus === 'done') nextStatus = 'frozen';
+            else if (currentStatus === 'frozen') nextStatus = 'recovered';
+            else if (currentStatus === 'recovered') nextStatus = 'missed';
+            else if (currentStatus === 'missed') nextStatus = 'none';
 
-            // Mejor racha (najdłuższa seria)
-            let bestRacha = leaderboardData.reduce((prev, current) => (current.streak > prev.streak) ? current : prev);
-            document.getElementById('mejorRachaName').innerText = `${bestRacha.user} (${bestRacha.streak} z rzędu)`;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateDay',
+                        user: currentUser,
+                        day: day,
+                        status: nextStatus
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    if (nextStatus === 'none') {
+                        delete userData[day];
+                    } else {
+                        userData[day] = nextStatus;
+                    }
+                    
+                    if (result.freezesCount !== undefined) {
+                        document.getElementById('freezesCount').innerText = result.freezesCount;
+                    }
+                    if (result.maxLimit !== undefined) {
+                        document.getElementById('maxFreezesLimit').innerText = result.maxLimit;
+                    }
+                    if (result.recoveriesCount !== undefined) {
+                        document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
+                    }
+
+                    renderGrid();
+                    
+                    // Odśwież tablicę wyników w tle
+                    fetch(`${SCRIPT_URL}?action=getLeaderboard`)
+                        .then(res => res.json())
+                        .then(leaderboardResult => {
+                            if (leaderboardResult.success) {
+                                const tbody = document.getElementById('leaderboardBody');
+                                tbody.innerHTML = '';
+                                leaderboardResult.data.forEach((row, index) => {
+                                    const tr = document.createElement('tr');
+                                    tr.innerHTML = `
+                                        <td>#${index + 1}</td>
+                                        <td>${row.user}</td>
+                                        <td><b>${row.done}</b></td>
+                                        <td>${row.freezes}</td>
+                                        <td>${row.recoveries}</td>
+                                    `;
+                                    tbody.appendChild(tr);
+                                });
+                            }
+                        });
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                console.error('Błąd połączenia z serwerem', err);
+            }
         }
     </script>
 </body>
