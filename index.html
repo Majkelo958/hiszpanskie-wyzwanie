@@ -30,7 +30,7 @@
         .stat-card { background: #ecf0f1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; color: #34495e; }
         .stat-card span { display: block; font-size: 20px; color: var(--primary); margin-top: 5px; }
 
-        /* Kafelki Nagród i Akcji (3 równe kolumny na dużym ekranie) */
+        /* Kafelki Nagród i Akcji */
         .awards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
         @media(min-width: 768px) {
             .awards-container { grid-template-columns: repeat(3, 1fr); }
@@ -39,7 +39,6 @@
         .award-card h3 { margin: 0 0 6px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
         .award-card p { margin: 0; font-size: 17px; font-weight: bold; word-break: break-word; }
 
-        /* Przycisk wewnątrz trzeciego kafelka */
         .action-card { background: linear-gradient(135deg, #2980b9, #3498db); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); cursor: pointer; transition: transform 0.2s; border: none; width: 100%; color: white; font-family: inherit; }
         .action-card:hover { transform: scale(1.02); opacity: 0.95; }
 
@@ -52,7 +51,7 @@
         .day-box.recovered { background-color: var(--recovery); color: white; border-color: #d35400; }
         .day-box.missed { background-color: var(--accent); color: white; border-color: #b03a2e; }
 
-        /* Modal wyboru statusu */
+        /* Modale */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
@@ -63,9 +62,12 @@
         .modal-btn.btn-freeze { background-color: var(--freeze); }
         .modal-btn.btn-recovery { background-color: var(--recovery); }
         .modal-btn.btn-clear { background-color: #95a5a6; }
+        .modal-btn.btn-gift { background-color: #2980b9; }
         .modal-btn:hover { opacity: 0.9; }
 
-        /* Responsywna tabela wyników z płynnym przewijaniem na telefonie */
+        .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+
+        /* Tabela wyników */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 14px; }
         th, td { border: 1px solid #dfe4ea; padding: 10px 12px; text-align: left; }
@@ -91,7 +93,7 @@
             <div class="stats-container">
                 <div class="stat-card">
                     Zamrożenia
-                    <span id="freezesCount">2</span>/2
+                    <span id="freezesCount">2</span>/<span id="maxFreezesCount">2</span>
                 </div>
                 <div class="stat-card">
                     Nadrobienia
@@ -109,7 +111,6 @@
                     <h3>🔥 Mejor Racha</h3>
                     <p id="streakAward">-</p>
                 </div>
-                <!-- Nowy kafelek z przyciskiem akcji -->
                 <button class="award-card action-card" onclick="openGiftModal()">
                     <h3>🎁 Prezent</h3>
                     <p>Podaruj zamrożenie</p>
@@ -151,17 +152,31 @@
             <button class="modal-btn btn-freeze" onclick="setStatus('frozen')">❄️ Zamrożenie</button>
             <button class="modal-btn btn-recovery" onclick="setStatus('recovered')">🔥 Nadrobiono</button>
             <button class="modal-btn btn-clear" onclick="setStatus('none')">🗑️ Wyczyść status</button>
-            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal()">Zamknij</button>
+            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal('statusModal')">Zamknij</button>
+        </div>
+    </div>
+
+    <!-- Modal darowania zamrożenia -->
+    <div id="giftModal" class="modal-overlay">
+        <div class="modal">
+            <h3>🎁 Podaruj zamrożenie</h3>
+            <p style="font-size: 14px; color: #555;">Wybierz uczestnika, któremu chcesz przekazać zamrożenie:</p>
+            <select id="giftUserSelect" class="user-list-select">
+                <!-- Wypełniane dynamicznie -->
+            </select>
+            <button class="modal-btn btn-gift" onclick="sendGiftFreeze()">Wyślij prezent</button>
+            <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal('giftModal')">Zamknij</button>
         </div>
     </div>
 
     <script>
         // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WEB APP
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCKnU0HxIOwCS-nS-0pbNAE4uYShjflasrLOG0IwMsKn7UABfdVvT78f_QHSoGDPRI/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeceH8WbDLthqXHSDdx7o4tLvt_3HjuEIPVdcVNiNWcUGVmUWiHpEzlO5qjrwkV7-0/exec"; 
 
         let currentUser = "";
         let userData = {};
         let selectedDay = null;
+        let allLeaderboardUsers = [];
 
         function handleLogin() {
             const input = document.getElementById('usernameInput').value.trim();
@@ -190,11 +205,13 @@
                 if (userResult.success) {
                     userData = userResult.days || {};
                     document.getElementById('freezesCount').innerText = userResult.freezesCount;
+                    document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
                     document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
                     renderGrid();
                 }
 
                 if (leaderboardResult.success) {
+                    allLeaderboardUsers = leaderboardResult.data;
                     renderLeaderboard(leaderboardResult.data);
                 }
 
@@ -217,25 +234,41 @@
                     box.classList.add(status);
                 }
 
-                box.onclick = () => openModal(i);
+                box.onclick = () => openStatusModal(i);
                 grid.appendChild(box);
             }
         }
 
-        function openModal(day) {
+        function openStatusModal(day) {
             selectedDay = day;
             document.getElementById('modalTitle').innerText = `Dzień ${day} - Wybierz status`;
             document.getElementById('statusModal').classList.add('active');
         }
 
-        function closeModal() {
-            document.getElementById('statusModal').classList.remove('active');
-            selectedDay = null;
+        function openGiftModal() {
+            const select = document.getElementById('giftUserSelect');
+            select.innerHTML = '';
+
+            // Filtrujemy, aby nie pokazywać siebie na liście obdarowywanych
+            const filteredUsers = allLeaderboardUsers.filter(u => u.user.toLowerCase() !== currentUser.toLowerCase());
+
+            if (filteredUsers.length === 0) {
+                select.innerHTML = '<option value="">Brak innych uczestników</option>';
+            } else {
+                filteredUsers.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.user;
+                    opt.innerText = u.user;
+                    select.appendChild(opt);
+                });
+            }
+
+            document.getElementById('giftModal').classList.add('active');
         }
 
-        function openGiftModal() {
-            // Tutaj w przyszłości podepniemy logikę / modal do wyboru komu podarować zamrożenie
-            alert("Funkcja darowania zamrożenia będzie dostępna w kolejnym kroku!");
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'statusModal') selectedDay = null;
         }
 
         function renderLeaderboard(data) {
@@ -279,11 +312,43 @@
             document.getElementById('streakAward').innerText = bestStreak > 0 ? streakLeaderName : "Brak danych";
         }
 
+        async function sendGiftFreeze() {
+            const targetUser = document.getElementById('giftUserSelect').value;
+            if (!targetUser) {
+                alert("Wybierz użytkownika!");
+                return;
+            }
+
+            closeModal('giftModal');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'giftFreeze',
+                        fromUser: currentUser,
+                        toUser: targetUser
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadUserData(); // Odświeżamy dane po wysłaniu prezentu
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                console.error('Błąd połączenia:', err);
+                alert("Błąd połączenia z serwerem.");
+            }
+        }
+
         async function setStatus(nextStatus) {
             if (!selectedDay) return;
             const day = selectedDay;
             const previousStatus = userData[day];
-            closeModal();
+            closeModal('statusModal');
 
             if (nextStatus === 'none') {
                 delete userData[day];
@@ -291,15 +356,6 @@
                 userData[day] = nextStatus;
             }
             renderGrid();
-
-            let tempFreezes = 0;
-            let tempRecoveries = 0;
-            for (let d in userData) {
-                if (userData[d] === 'frozen') tempFreezes++;
-                if (userData[d] === 'recovered') tempRecoveries++;
-            }
-            document.getElementById('freezesCount').innerText = 2 - tempFreezes;
-            document.getElementById('recoveriesCount').innerText = 2 - tempRecoveries;
 
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -317,14 +373,15 @@
                     if (result.freezesCount !== undefined) {
                         document.getElementById('freezesCount').innerText = result.freezesCount;
                     }
-                    if (result.recoveriesCount !== undefined) {
-                        document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
+                    if (result.maxFreezes !== undefined) {
+                        document.getElementById('maxFreezesCount').innerText = result.maxFreezes;
                     }
 
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
                         .then(leaderboardResult => {
                             if (leaderboardResult.success) {
+                                allLeaderboardUsers = leaderboardResult.data;
                                 renderLeaderboard(leaderboardResult.data);
                             }
                         });
