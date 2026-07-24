@@ -341,7 +341,7 @@
 }
         
         // TUTAJ WSTAW SWÓJ URL DO WEB APP Z GOOGLE APPS SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4Dk8fwsCKv1iRwfn_Wfz4r1wF8R8dGti1gqxF163LPl1z92uv1rYkzIIB8kkDnW8W/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpTb24aoJ_VecgqwNBoDLzfNsHHcBfgroGFhx4poLwtA44PP8dEVxOiIvP395wS88P/exec";
 
         let currentUser = localStorage.getItem('hs_user') || '';
         let userData = {};
@@ -507,6 +507,7 @@
         if (userResult.success) {
             userData = userResult.days || {};
             document.getElementById('freezesCount').innerText = userResult.freezesCount;
+            document.getElementById('maxFreezesLimit').innerText = response.maxLimit;
             document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
             renderGrid();
         }
