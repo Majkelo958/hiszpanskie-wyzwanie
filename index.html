@@ -9,9 +9,9 @@
             --primary: #2c3e50;
             --accent: #e74c3c;
             --success: #27ae60;
-            --freeze: #2980b9;
-            --recovery: #d35400;
-            --bg: #f8f9fa;
+            --freeze: #3498db;
+            --recovery: #e67e22;
+            --bg: #f4f6f9;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
@@ -26,17 +26,23 @@
         #loginSection button:hover { background-color: #34495e; }
 
         /* Panel główny i statystyki */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: #f1f2f6; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; }
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #ecf0f1; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 15px; color: #34495e; }
         .stat-card span { display: block; font-size: 22px; color: var(--primary); margin-top: 5px; }
 
+        /* Kafelki nagród (Campeon i Mejor racha) */
+        .awards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .award-card { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 18px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3); }
+        .award-card h3 { margin: 0 0 8px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .award-card p { margin: 0; font-size: 20px; font-weight: bold; }
+
         /* Siatka dni */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 10px; margin-top: 20px; }
-        .day-box { aspect-ratio: 1; border: 2px solid #ddd; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; background: #fff; transition: all 0.2s; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; margin-top: 20px; }
+        .day-box { aspect-ratio: 1; border: 2px solid #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; background: #fff; transition: all 0.2s; font-size: 16px; }
         .day-box:hover { transform: scale(1.05); border-color: #b2bec3; }
         .day-box.done { background-color: var(--success); color: white; border-color: #219653; }
-        .day-box.frozen { background-color: var(--freeze); color: white; border-color: #1b4f72; }
-        .day-box.recovered { background-color: var(--recovery); color: white; border-color: #a04000; }
+        .day-box.frozen { background-color: var(--freeze); color: white; border-color: #2980b9; }
+        .day-box.recovered { background-color: var(--recovery); color: white; border-color: #d35400; }
         .day-box.missed { background-color: var(--accent); color: white; border-color: #b03a2e; }
 
         /* Tabela wyników */
@@ -52,7 +58,7 @@
         <!-- Sekcja Logowania -->
         <div id="loginSection" class="section active">
             <h1>Hiszpańskie Wyzwanie</h1>
-            <p>Wpisz swoje imię, aby otworzyć swój panel:</p>
+            <p>Wpisz swoje imię, aby otworzyć panel:</p>
             <input type="text" id="usernameInput" placeholder="Twoje imię...">
             <button onclick="handleLogin()">Wejdź do wyzwania</button>
         </div>
@@ -63,12 +69,24 @@
             
             <div class="stats-container">
                 <div class="stat-card">
-                    Zamrożenia
-                    <span><span id="freezesCount">2</span>/<span id="maxFreezesLimit">2</span></span>
+                    Pozostałe Zamrożenia
+                    <span id="freezesCount">2</span>/2
                 </div>
                 <div class="stat-card">
-                    Nadrobienia
-                    <span><span id="recoveriesCount">2</span>/2</span>
+                    Pozostałe Nadrobienia
+                    <span id="recoveriesCount">2</span>/2
+                </div>
+            </div>
+
+            <!-- Kafelki Nagród -->
+            <div class="awards-container">
+                <div class="award-card">
+                    <h3>🏆 Campeón de la Disciplina</h3>
+                    <p id="championAward">-</p>
+                </div>
+                <div class="award-card" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);">
+                    <h3>🔥 Mejor Racha</h3>
+                    <p id="streakAward">-</p>
                 </div>
             </div>
 
@@ -85,6 +103,7 @@
                             <th>Ukończone dni</th>
                             <th>Zamrożenia</th>
                             <th>Nadrobienia</th>
+                            <th>Najlepsza passa</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboardBody">
@@ -96,8 +115,8 @@
     </div>
 
     <script>
-        // TUTAJ WKLEJ SWÓJ URL WEB APP Z GOOGLE APPS SCRIPT
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyh-ZPnm-qfl24kgnS4kqGl7K6SaRtnUZU6LkoFrsOCZ_gjvpPiUEW85VfRNwDZmbek/exec"; 
+        // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WEB APP
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCKnU0HxIOwCS-nS-0pbNAE4uYShjflasrLOG0IwMsKn7UABfdVvT78f_QHSoGDPRI/exec"; 
 
         let currentUser = "";
         let userData = {};
@@ -129,7 +148,6 @@
                 if (userResult.success) {
                     userData = userResult.days || {};
                     document.getElementById('freezesCount').innerText = userResult.freezesCount;
-                    document.getElementById('maxFreezesLimit').innerText = userResult.maxLimit ?? 2;
                     document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
                     renderGrid();
                 }
@@ -166,7 +184,29 @@
             const tbody = document.getElementById('leaderboardBody');
             tbody.innerHTML = '';
             
+            let bestDone = -1;
+            let championName = "Brak";
+            
+            let bestStreak = -1;
+            let streakLeaderName = "Brak";
+
             data.forEach((row, index) => {
+                // Sprawdzamy lidera ukończonych (Campeón)
+                if (row.done > bestDone) {
+                    bestDone = row.done;
+                    championName = `${row.user} (${row.done} dni)`;
+                } else if (row.done === bestDone && bestDone > 0) {
+                    championName += `, ${row.user}`;
+                }
+
+                // Sprawdzamy lidera passy (Mejor racha)
+                if (row.streak > bestStreak) {
+                    bestStreak = row.streak;
+                    streakLeaderName = `${row.user} (${row.streak} z rzędu)`;
+                } else if (row.streak === bestStreak && bestStreak > 0) {
+                    streakLeaderName += `, ${row.user}`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
@@ -174,9 +214,14 @@
                     <td>${row.done}</td>
                     <td>${row.freezes}</td>
                     <td>${row.recoveries}</td>
+                    <td>${row.streak} dni</td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Ustawienie wartości kafelków nagród
+            document.getElementById('championAward').innerText = bestDone > 0 ? championName : "Brak danych";
+            document.getElementById('streakAward').innerText = bestStreak > 0 ? streakLeaderName : "Brak danych";
         }
 
         async function cycleDayStatus(day) {
@@ -211,16 +256,13 @@
                     if (result.freezesCount !== undefined) {
                         document.getElementById('freezesCount').innerText = result.freezesCount;
                     }
-                    if (result.maxLimit !== undefined) {
-                        document.getElementById('maxFreezesLimit').innerText = result.maxLimit;
-                    }
                     if (result.recoveriesCount !== undefined) {
                         document.getElementById('recoveriesCount').innerText = result.recoveriesCount;
                     }
 
                     renderGrid();
                     
-                    // Odśwież ranking w tle
+                    // Odśwież ranking i nagrody w tle
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
                         .then(leaderboardResult => {
