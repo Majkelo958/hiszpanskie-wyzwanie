@@ -278,6 +278,33 @@
 
     <script>
 
+        // TUTAJ WKLEJAMY NASZĄ NOWĄ FUNKCJĘ:
+    function promptGiftFreezeGlobal() {
+        const targetUser = prompt("Wpisz imię/nick osoby, której chcesz podarować zamrożenie:");
+        if (!targetUser || !targetUser.trim()) return;
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'giftFreezeGlobal',
+                fromUser: currentUser,
+                toUser: targetUser.trim()
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert(`Pomyślnie podarowano zamrożenie dla użytkownika ${targetUser.trim()}!`);
+                loadUserData(); // Odświeżenie danych na ekranie
+            } else {
+                alert('Błąd: ' + result.message);
+            }
+        })
+        .catch(err => {
+            alert('Błąd połączenia z serwerem: ' + err);
+        });
+    }
+
         function promptGiftFreeze() {
     const dayToGift = activeDay;
     closeModal();
