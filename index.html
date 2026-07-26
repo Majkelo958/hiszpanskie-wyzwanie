@@ -187,6 +187,7 @@
         let userData = {};
         let selectedDay = null;
         let allLeaderboardUsers = [];
+        let currentFreezesCount = 2; // Śledzenie dostępnych zamrożeń lokalnie
 
         function showNotification(title, message) {
             document.getElementById('infoModalTitle').innerText = title;
@@ -249,10 +250,11 @@
                 
                 if (userResult.success) {
                     userData = userResult.days || {};
-                    document.getElementById('freezesCount').innerText = userResult.freezesCount;
+                    currentFreezesCount = userResult.freezesCount !== undefined ? userResult.freezesCount : 2;
+                    
+                    document.getElementById('freezesCount').innerText = currentFreezesCount;
                     document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
                     
-                    // Licznik nadrobień (zabezpieczenie przed ujemnymi wartościami)
                     const recoveriesLeft = userResult.recoveriesCount !== undefined ? userResult.recoveriesCount : 2;
                     document.getElementById('recoveriesCount').innerText = recoveriesLeft < 0 ? 0 : recoveriesLeft;
                     document.getElementById('maxRecoveriesCount').innerText = 2;
@@ -396,9 +398,18 @@
         async function setStatus(nextStatus) {
             if (!selectedDay) return;
             const day = selectedDay;
-            const previousStatus = userData[day];
+            const previousStatus = userData[day] || 'none';
+            
+            // Blokada frontendowa: Jeśli użytkownik próbuje zamrozić, a limit wynosi 0 i ten dzień nie był wcześniej zamrożony
+            if (nextStatus === 'frozen' && previousStatus !== 'frozen' && currentFreezesCount <= 0) {
+                closeModal('statusModal');
+                showNotification("Limit wyczerpany", "Nie masz już dostępnych zamrożeń!");
+                return;
+            }
+
             closeModal('statusModal');
 
+            // Symulacja zmian wizualnych (zabezpieczona)
             if (nextStatus === 'none') {
                 delete userData[day];
             } else {
@@ -419,7 +430,7 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    loadUserData(); // Odświeża w pełni stan i liczniki z backendu
+                    loadUserData(); // Pobranie rzetelnego stanu z backendu
                     
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
@@ -430,10 +441,11 @@
                             }
                         });
                 } else {
-                    if (previousStatus) {
-                        userData[day] = previousStatus;
-                    } else {
+                    // Przywrócenie stanu w razie odrzucenia przez serwer
+                    if (previousStatus === 'none') {
                         delete userData[day];
+                    } else {
+                        userData[day] = previousStatus;
                     }
                     renderGrid();
                     loadUserData(); 
@@ -441,10 +453,10 @@
                 }
             } catch (err) {
                 console.error('Błąd połączenia z serwerem:', err);
-                if (previousStatus) {
-                    userData[day] = previousStatus;
-                } else {
+                if (previousStatus === 'none') {
                     delete userData[day];
+                } else {
+                    userData[day] = previousStatus;
                 }
                 renderGrid();
                 showNotification("Błąd", "Błąd połączenia z serwerem. Zmiana została cofnięta.");
