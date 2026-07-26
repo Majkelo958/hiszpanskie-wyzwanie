@@ -188,7 +188,8 @@
         let userData = {};
         let selectedDay = null;
         let allLeaderboardUsers = [];
-        let currentFreezesCount = 2; // Śledzenie dostępnych zamrożeń lokalnie
+        let currentFreezesCount = 2;
+        let currentRecoveriesCount = 2;
 
         function showNotification(title, message) {
             document.getElementById('infoModalTitle').innerText = title;
@@ -257,7 +258,8 @@
                     document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
                     
                     const recoveriesLeft = userResult.recoveriesCount !== undefined ? userResult.recoveriesCount : 2;
-                    document.getElementById('recoveriesCount').innerText = recoveriesLeft < 0 ? 0 : recoveriesLeft;
+                    currentRecoveriesCount = recoveriesLeft < 0 ? 0 : recoveriesLeft;
+                    document.getElementById('recoveriesCount').innerText = currentRecoveriesCount;
                     document.getElementById('maxRecoveriesCount').innerText = 2;
 
                     renderGrid();
@@ -401,10 +403,17 @@
             const day = selectedDay;
             const previousStatus = userData[day] || 'none';
             
-            // Blokada frontendowa: Jeśli użytkownik próbuje zamrozić, a limit wynosi 0 i ten dzień nie był wcześniej zamrożony
+            // Błyskawiczna blokada frontendowa dla zamrożeń
             if (nextStatus === 'frozen' && previousStatus !== 'frozen' && currentFreezesCount <= 0) {
                 closeModal('statusModal');
                 showNotification("Limit wyczerpany", "Nie masz już dostępnych zamrożeń!");
+                return;
+            }
+
+            // Błyskawiczna blokada frontendowa dla nadrobień
+            if (nextStatus === 'recovered' && previousStatus !== 'recovered' && currentRecoveriesCount <= 0) {
+                closeModal('statusModal');
+                showNotification("Limit wyczerpany", "Nie masz już dostępnych nadrobień!");
                 return;
             }
 
