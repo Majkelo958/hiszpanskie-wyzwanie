@@ -263,6 +263,9 @@
                     document.getElementById('maxRecoveriesCount').innerText = 2;
 
                     renderGrid();
+
+                    // Sprawdzenie wieczornego przypomnienia (po godzinie 18:00)
+                    checkEveningReminder();
                 }
 
                 if (leaderboardResult.success) {
@@ -272,6 +275,29 @@
 
             } catch (err) {
                 console.error('Błąd podczas ładowania danych:', err);
+            }
+        }
+
+        function checkEveningReminder() {
+            const now = new Date();
+            const currentHour = now.getHours();
+
+            // Jeśli jest po 18:00
+            if (currentHour >= 18) {
+                // Znajdujemy pierwszy wolny / nieuzupełniony dzień lub po prostu sprawdzamy ostatni aktywny dzień w toku
+                // Dla uproszczenia: szukamy pierwszego dnia z zakresu 1-30, który nie ma statusu
+                let firstEmptyDay = null;
+                for (let i = 1; i <= 30; i++) {
+                    if (!userData[i]) {
+                        firstEmptyDay = i;
+                        break;
+                    }
+                }
+
+                // Jeśli znaleziono puste miejsce i użytkownik dzisiaj jeszcze nic nie oznaczył (lub brakuje bieżącego dnia)
+                if (firstEmptyDay) {
+                    showNotification("Wieczorne przypomnienie 🌙", `Hej! Wygląda na to, że masz jeszcze zaległy lub dzisiejszy dzień (${firstEmptyDay}) do zrobienia. Nie pozwól, aby Twoja passa ucierpiała! 🔥`);
+                }
             }
         }
 
