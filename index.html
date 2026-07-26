@@ -28,7 +28,7 @@
         /* Panel główny i statystyki */
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .stat-card { background: #ecf0f1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; color: #34495e; }
-        .stat-card span { display: block; font-size: 20px; color: var(--primary); margin-top: 5px; }
+        .stat-card span { display: inline; font-size: 20px; color: var(--primary); margin-top: 5px; }
 
         /* Kafelki Nagród i Akcji */
         .awards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
@@ -94,12 +94,12 @@
             
             <div class="stats-container">
                 <div class="stat-card">
-                    Zamrożenia
+                    Zamrożenia<br>
                     <span id="freezesCount">2</span>/<span id="maxFreezesCount">2</span>
                 </div>
                 <div class="stat-card">
-                    Nadrobienia
-                    <span id="recoveriesCount">2</span>/<span id="maxFreezesCount">2</span>
+                    Nadrobienia<br>
+                    <span id="recoveriesCount">2</span>/<span id="maxRecoveriesCount">2</span>
                 </div>
             </div>
 
@@ -171,7 +171,7 @@
         </div>
     </div>
 
-    <!-- Nowy Modal Informacyjny (zastępujący standardowe alerty) -->
+    <!-- Modal Informacyjny -->
     <div id="infoModal" class="modal-overlay">
         <div class="modal">
             <h3 id="infoModalTitle">Powiadomienie</h3>
@@ -181,14 +181,13 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgPs-FsBW6hoXMgJ-NfohnXnySBAXGwpHAoIlb4tFApXkqsrWf5Ej8qaCbSf0vRfI/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5Yqa6Qzk71yK01T_fE9hZLjQ9g7TrEW8xPpUJCGK7ebJHnAyBG88kIyCuY47vwpsB/exec"; 
 
         let currentUser = "";
         let userData = {};
         let selectedDay = null;
         let allLeaderboardUsers = [];
 
-        // Funkcja wyświetlająca elegancki modal zamiast alertu
         function showNotification(title, message) {
             document.getElementById('infoModalTitle').innerText = title;
             document.getElementById('infoModalText').innerText = message;
@@ -252,7 +251,12 @@
                     userData = userResult.days || {};
                     document.getElementById('freezesCount').innerText = userResult.freezesCount;
                     document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
-                    document.getElementById('recoveriesCount').innerText = userResult.recoveriesCount;
+                    
+                    // Licznik nadrobień (zabezpieczenie przed ujemnymi wartościami)
+                    const recoveriesLeft = userResult.recoveriesCount !== undefined ? userResult.recoveriesCount : 2;
+                    document.getElementById('recoveriesCount').innerText = recoveriesLeft < 0 ? 0 : recoveriesLeft;
+                    document.getElementById('maxRecoveriesCount').innerText = 2;
+
                     renderGrid();
                 }
 
@@ -415,13 +419,8 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    if (result.freezesCount !== undefined) {
-                        document.getElementById('freezesCount').innerText = result.freezesCount;
-                    }
-                    if (result.maxFreezes !== undefined) {
-                        document.getElementById('maxFreezesCount').innerText = result.maxFreezes;
-                    }
-
+                    loadUserData(); // Odświeża w pełni stan i liczniki z backendu
+                    
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
                         .then(leaderboardResult => {
