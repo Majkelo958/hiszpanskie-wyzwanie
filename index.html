@@ -21,7 +21,7 @@
         
         /* Ekran logowania */
         #loginSection { text-align: center; padding: 40px 0; }
-        #loginSection input { padding: 12px 20px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; width: 80%; max-width: 300px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+        #loginSection select { padding: 12px 20px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 80%; max-width: 300px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; background-color: white; cursor: pointer; }
         #loginSection button { padding: 12px 30px; font-size: 18px; background-color: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #loginSection button:hover { background-color: #34495e; }
 
@@ -65,7 +65,7 @@
         .modal-btn.btn-gift { background-color: #2980b9; }
         .modal-btn:hover { opacity: 0.9; }
 
-        .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: white; }
 
         /* Tabela wyników */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -81,8 +81,10 @@
         <!-- Sekcja Logowania -->
         <div id="loginSection" class="section active">
             <h1>Hiszpańskie Wyzwanie</h1>
-            <p>Wpisz swoje imię, aby otworzyć panel:</p>
-            <input type="text" id="usernameInput" placeholder="Twoje imię...">
+            <p>Wybierz swoje imię z listy, aby otworzyć panel:</p>
+            <select id="loginUserSelect">
+                <option value="">Pobieranie listy uczestników...</option>
+            </select>
             <button onclick="handleLogin()">Wejdź do wyzwania</button>
         </div>
 
@@ -170,7 +172,6 @@
     </div>
 
     <script>
-        // TUTAJ WKLEJ SWÓJ URL WEJŚCIOWY Z GOOGLE APPS SCRIPT WEB APP
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5Yqa6Qzk71yK01T_fE9hZLjQ9g7TrEW8xPpUJCGK7ebJHnAyBG88kIyCuY47vwpsB/exec"; 
 
         let currentUser = "";
@@ -178,13 +179,43 @@
         let selectedDay = null;
         let allLeaderboardUsers = [];
 
+        // Automatyczne pobranie listy użytkowników przy starcie strony
+        window.onload = function() {
+            loadLoginLeaderboard();
+        };
+
+        async function loadLoginLeaderboard() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getLeaderboard`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    allLeaderboardUsers = result.data;
+                    const select = document.getElementById('loginUserSelect');
+                    select.innerHTML = '<option value="">-- Wybierz swoje imię --</option>';
+                    
+                    result.data.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.user;
+                        opt.innerText = u.user;
+                        select.appendChild(opt);
+                    });
+                } else {
+                    document.getElementById('loginUserSelect').innerHTML = '<option value="">Błąd ładowania listy</option>';
+                }
+            } catch (err) {
+                console.error('Błąd pobierania listy użytkowników:', err);
+                document.getElementById('loginUserSelect').innerHTML = '<option value="">Błąd połączenia z serwerem</option>';
+            }
+        }
+
         function handleLogin() {
-            const input = document.getElementById('usernameInput').value.trim();
-            if (!input) {
-                alert("Wpisz swoje imię!");
+            const select = document.getElementById('loginUserSelect').value;
+            if (!select) {
+                alert("Musisz wybrać swoje imię z listy!");
                 return;
             }
-            currentUser = input;
+            currentUser = select;
             loadUserData();
         }
 
@@ -249,7 +280,6 @@
             const select = document.getElementById('giftUserSelect');
             select.innerHTML = '';
 
-            // Filtrujemy, aby nie pokazywać siebie na liście obdarowywanych
             const filteredUsers = allLeaderboardUsers.filter(u => u.user.toLowerCase() !== currentUser.toLowerCase());
 
             if (filteredUsers.length === 0) {
@@ -334,7 +364,7 @@
                 const result = await response.json();
                 if (result.success) {
                     alert(result.message);
-                    loadUserData(); // Odświeżamy dane po wysłaniu prezentu
+                    loadUserData(); 
                 } else {
                     alert(result.message);
                 }
