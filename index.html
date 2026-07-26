@@ -171,6 +171,15 @@
         </div>
     </div>
 
+    <!-- Nowy Modal Informacyjny (zastępujący standardowe alerty) -->
+    <div id="infoModal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="infoModalTitle">Powiadomienie</h3>
+            <p id="infoModalText" style="font-size: 14px; color: #555; margin-bottom: 20px;"></p>
+            <button class="modal-btn btn-gift" onclick="closeModal('infoModal')">OK</button>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5Yqa6Qzk71yK01T_fE9hZLjQ9g7TrEW8xPpUJCGK7ebJHnAyBG88kIyCuY47vwpsB/exec"; 
 
@@ -179,7 +188,13 @@
         let selectedDay = null;
         let allLeaderboardUsers = [];
 
-        // Automatyczne pobranie listy użytkowników przy starcie strony
+        // Funkcja wyświetlająca elegancki modal zamiast alertu
+        function showNotification(title, message) {
+            document.getElementById('infoModalTitle').innerText = title;
+            document.getElementById('infoModalText').innerText = message;
+            document.getElementById('infoModal').classList.add('active');
+        }
+
         window.onload = function() {
             loadLoginLeaderboard();
         };
@@ -212,7 +227,7 @@
         function handleLogin() {
             const select = document.getElementById('loginUserSelect').value;
             if (!select) {
-                alert("Musisz wybrać swoje imię z listy!");
+                showNotification("Uwaga", "Musisz wybrać swoje imię z listy!");
                 return;
             }
             currentUser = select;
@@ -345,7 +360,7 @@
         async function sendGiftFreeze() {
             const targetUser = document.getElementById('giftUserSelect').value;
             if (!targetUser) {
-                alert("Wybierz użytkownika!");
+                showNotification("Uwaga", "Wybierz użytkownika!");
                 return;
             }
 
@@ -363,14 +378,14 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    alert(result.message);
+                    showNotification("Sukces", result.message);
                     loadUserData(); 
                 } else {
-                    alert(result.message);
+                    showNotification("Informacja", result.message);
                 }
             } catch (err) {
                 console.error('Błąd połączenia:', err);
-                alert("Błąd połączenia z serwerem.");
+                showNotification("Błąd", "Błąd połączenia z serwerem.");
             }
         }
 
@@ -423,7 +438,7 @@
                     }
                     renderGrid();
                     loadUserData(); 
-                    alert(result.message);
+                    showNotification("Ostrzeżenie", result.message);
                 }
             } catch (err) {
                 console.error('Błąd połączenia z serwerem:', err);
@@ -433,7 +448,7 @@
                     delete userData[day];
                 }
                 renderGrid();
-                alert("Błąd połączenia z serwerem. Zmiana została cofnięta.");
+                showNotification("Błąd", "Błąd połączenia z serwerem. Zmiana została cofnięta.");
             }
         }
     </script>
