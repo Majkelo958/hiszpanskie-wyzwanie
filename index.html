@@ -374,7 +374,7 @@
                     <td>#${index + 1}</td>
                     <td><b>${row.user}</b></td>
                     <td>${row.done}</td>
-                    <td>${row.freezes}</td>
+                    <td>${row.frozen !== undefined ? row.frozen : 0}</td>
                     <td>${row.recoveries}</td>
                     <td>${row.streak} dni</td>
                 `;
