@@ -20,23 +20,24 @@
         .section.active { display: block; }
         h1, h2 { color: var(--primary); text-align: center; font-size: 24px; }
         
+        /* Ekran logowania */
         #loginSection { text-align: center; padding: 40px 0; }
         #loginSection select { padding: 12px 20px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 80%; max-width: 300px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; background-color: white; cursor: pointer; }
         #loginSection button { padding: 12px 30px; font-size: 18px; background-color: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #loginSection button:hover { background-color: #34495e; }
 
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px; }
+        /* Nagłówek panelu z przyciskiem wylogowania */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
         .dashboard-header h1 { margin: 0; text-align: left; }
-        .header-buttons { display: flex; gap: 8px; align-items: center; }
         .btn-logout { background: #95a5a6; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-logout:hover { background: #7f8c8d; }
-        .btn-rules { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .btn-rules:hover { background: #34495e; }
 
+        /* Panel główny i statystyki */
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .stat-card { background: #ecf0f1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; color: #34495e; }
         .stat-card span { display: inline; font-size: 20px; color: var(--primary); margin-top: 5px; }
 
+        /* Kafelki Nagród i Akcji */
         .awards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
         @media(min-width: 768px) {
             .awards-container { grid-template-columns: repeat(3, 1fr); }
@@ -49,6 +50,7 @@
         .action-card:hover { transform: scale(1.02); opacity: 0.95; }
         .action-card:disabled { background: #95a5a6; box-shadow: none; cursor: not-allowed; transform: none; opacity: 0.7; }
 
+        /* Siatka dni */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 8px; margin-top: 15px; }
         .day-box { aspect-ratio: 1; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; background: #fff; transition: all 0.2s; font-size: 15px; }
         .day-box:hover { transform: scale(1.05); border-color: #b2bec3; }
@@ -57,6 +59,7 @@
         .day-box.recovered { background-color: var(--recovery); color: white; border-color: #d35400; }
         .day-box.missed { background-color: var(--accent); color: white; border-color: #b03a2e; }
 
+        /* Modale */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
@@ -67,11 +70,12 @@
         .modal-btn.btn-freeze { background-color: var(--freeze); }
         .modal-btn.btn-recovery { background-color: var(--recovery); }
         .modal-btn.btn-clear { background-color: #95a5a6; }
-        .modal-btn.btn-gift { background-color: var(--2980b9); }
+        .modal-btn.btn-gift { background-color: #2980b9; }
         .modal-btn:hover { opacity: 0.9; }
 
         .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: white; }
 
+        /* Tabela wyników */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 14px; }
         th, td { border: 1px solid #dfe4ea; padding: 10px 12px; text-align: left; }
@@ -82,6 +86,7 @@
 <body>
 
     <div class="container">
+        <!-- Sekcja Logowania -->
         <div id="loginSection" class="section active">
             <h1>Hiszpańskie Wyzwanie</h1>
             <p>Wybierz swoje imię z listy, aby otworzyć panel:</p>
@@ -91,13 +96,11 @@
             <button onclick="handleLogin()">Wejdź do wyzwania</button>
         </div>
 
+        <!-- Sekcja Panelu Głównego -->
         <div id="dashboardSection" class="section">
             <div class="dashboard-header">
                 <h1 id="welcomeUser" style="margin:0;">Witaj</h1>
-                <div class="header-buttons">
-                    <button class="btn-rules" onclick="openRulesModal()">📖 Regulamin</button>
-                    <button class="btn-logout" onclick="handleLogout()">Zmień użytkownika</button>
-                </div>
+                <button class="btn-logout" onclick="handleLogout()">Zmień użytkownika</button>
             </div>
             
             <div class="stats-container">
@@ -111,6 +114,7 @@
                 </div>
             </div>
 
+            <!-- Kafelki Nagród i Akcji -->
             <div class="awards-container">
                 <div class="award-card">
                     <h3>🏆 Campeón de la Disciplina</h3>
@@ -143,14 +147,16 @@
                                 <th>Passa</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboardBody"></tbody>
+                        <tbody id="leaderboardBody">
+                            <!-- Wypełniane dynamicznie -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Statusu Dnia -->
+    <!-- Modal wyboru statusu dnia -->
     <div id="statusModal" class="modal-overlay">
         <div class="modal">
             <h3 id="modalTitle">Wybierz status</h3>
@@ -163,28 +169,16 @@
         </div>
     </div>
 
-    <!-- Modal Prezentu -->
+    <!-- Modal darowania zamrożenia -->
     <div id="giftModal" class="modal-overlay">
         <div class="modal">
             <h3>🎁 Podaruj zamrożenie</h3>
             <p style="font-size: 14px; color: #555;">Wybierz uczestnika, któremu chcesz przekazać zamrożenie:</p>
-            <select id="giftUserSelect" class="user-list-select"></select>
+            <select id="giftUserSelect" class="user-list-select">
+                <!-- Wypełniane dynamicznie -->
+            </select>
             <button class="modal-btn btn-gift" onclick="sendGiftFreeze()">Wyślij prezent</button>
             <button style="background:none; border:none; color:#7f8c8d; margin-top:10px; cursor:pointer; font-size:14px;" onclick="closeModal('giftModal')">Zamknij</button>
-        </div>
-    </div>
-
-    <!-- Modal Regulaminu -->
-    <div id="rulesModal" class="modal-overlay">
-        <div class="modal" style="max-width: 400px; text-align: left;">
-            <h3 style="text-align: center;">📖 Regulamin Wyzwania</h3>
-            <ul style="font-size: 13px; color: #444; padding-left: 20px; line-height: 1.5;">
-                <li>Codziennie zaznaczaj wykonanie swojego zadania (Zaliczone).</li>
-                <li>Masz do dyspozycji <b>2 zamrożenia</b> (❄️) na wypadek trudniejszych dni.</li>
-                <li>Możesz skorzystać z <b>2 nadrobień</b> (🔥).</li>
-                <li>Możesz podarować jedno zamrożenie innemu uczestnikowi przez przycisk prezentu.</li>
-            </ul>
-            <button class="modal-btn btn-gift" onclick="closeModal('rulesModal')">Rozumiem</button>
         </div>
     </div>
 
@@ -198,7 +192,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-ra5IjkW94fNRUK4CAdbBrvRmQfx_TLidzb705w-ZS1f6O28o_xDYYfEJEFFmGf_p/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwiI7TYyB2k5Bn_FTRTOKbFs_dqGHHlftjmMj_vOkBbYgy78Q16iFIrjEplv43Lz9UQ/exec"; 
 
         let currentUser = "";
         let userData = {};
@@ -208,7 +202,6 @@
         let currentRecoveriesCount = 2;
         let hasGivenFreeze = false;
         let refreshInterval = null;
-        let isRefreshing = false;
 
         function showNotification(title, message) {
             document.getElementById('infoModalTitle').innerText = title;
@@ -243,9 +236,12 @@
                         opt.innerText = u.user;
                         select.appendChild(opt);
                     });
+                } else {
+                    document.getElementById('loginUserSelect').innerHTML = '<option value="">Błąd ładowania listy</option>';
                 }
             } catch (err) {
-                console.error('Błąd pobierania listy:', err);
+                console.error('Błąd pobierania listy użytkowników:', err);
+                document.getElementById('loginUserSelect').innerHTML = '<option value="">Błąd połączenia z serwerem</option>';
             }
         }
 
@@ -273,55 +269,54 @@
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
             refreshInterval = setInterval(() => {
-                if (currentUser && !isRefreshing) {
+                if (currentUser) {
                     silentRefreshData();
                 }
             }, 15000);
         }
 
         async function silentRefreshData() {
-            if (isRefreshing) return;
-            isRefreshing = true;
             try {
-                const response = await fetch(`${SCRIPT_URL}?action=getAppData&user=${encodeURIComponent(currentUser)}`);
-                const result = await response.json();
+                const [userResponse, leaderboardResponse] = await Promise.all([
+                    fetch(`${SCRIPT_URL}?action=getUserData&user=${encodeURIComponent(currentUser)}`),
+                    fetch(`${SCRIPT_URL}?action=getLeaderboard`)
+                ]);
+
+                const userResult = await userResponse.json();
+                const leaderboardResult = await leaderboardResponse.json();
                 
-                if (result.success) {
-                    if (result.user && result.user.success) {
-                        userData = result.user.days || {};
-                        currentFreezesCount = result.user.freezesCount !== undefined ? result.user.freezesCount : 2;
-                        hasGivenFreeze = !!result.user.hasGivenFreeze;
-                        
-                        document.getElementById('freezesCount').innerText = currentFreezesCount;
-                        document.getElementById('maxFreezesCount').innerText = result.user.maxFreezes || 2;
-                        
-                        const recoveriesLeft = result.user.recoveriesCount !== undefined ? result.user.recoveriesCount : 2;
-                        currentRecoveriesCount = recoveriesLeft < 0 ? 0 : recoveriesLeft;
-                        document.getElementById('recoveriesCount').innerText = currentRecoveriesCount;
-                        document.getElementById('maxRecoveriesCount').innerText = 2;
+                if (userResult.success) {
+                    userData = userResult.days || {};
+                    currentFreezesCount = userResult.freezesCount !== undefined ? userResult.freezesCount : 2;
+                    hasGivenFreeze = !!userResult.hasGivenFreeze;
+                    
+                    document.getElementById('freezesCount').innerText = currentFreezesCount;
+                    document.getElementById('maxFreezesCount').innerText = userResult.maxFreezes || 2;
+                    
+                    const recoveriesLeft = userResult.recoveriesCount !== undefined ? userResult.recoveriesCount : 2;
+                    currentRecoveriesCount = recoveriesLeft < 0 ? 0 : recoveriesLeft;
+                    document.getElementById('recoveriesCount').innerText = currentRecoveriesCount;
+                    document.getElementById('maxRecoveriesCount').innerText = 2;
 
-                        const giftBtn = document.getElementById('giftFreezeBtn');
-                        const giftText = document.getElementById('giftButtonText');
-                        if (hasGivenFreeze) {
-                            giftBtn.disabled = true;
-                            giftText.innerText = "Wykorzystano";
-                        } else {
-                            giftBtn.disabled = false;
-                            giftText.innerText = "Podaruj zamrożenie";
-                        }
-
-                        renderGrid();
+                    const giftBtn = document.getElementById('giftFreezeBtn');
+                    const giftText = document.getElementById('giftButtonText');
+                    if (hasGivenFreeze) {
+                        giftBtn.disabled = true;
+                        giftText.innerText = "Wykorzystano";
+                    } else {
+                        giftBtn.disabled = false;
+                        giftText.innerText = "Podaruj zamrożenie";
                     }
 
-                    if (result.leaderboard && result.leaderboard.success) {
-                        allLeaderboardUsers = result.leaderboard.data;
-                        renderLeaderboard(result.leaderboard.data);
-                    }
+                    renderGrid();
+                }
+
+                if (leaderboardResult.success) {
+                    allLeaderboardUsers = leaderboardResult.data;
+                    renderLeaderboard(leaderboardResult.data);
                 }
             } catch (err) {
-                console.error('Błąd odświeżania:', err);
-            } finally {
-                isRefreshing = false;
+                console.error('Ciche odświeżanie nie powiodło się:', err);
             }
         }
 
@@ -383,10 +378,6 @@
             document.getElementById('giftModal').classList.add('active');
         }
 
-        function openRulesModal() {
-            document.getElementById('rulesModal').classList.add('active');
-        }
-
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
             if (modalId === 'statusModal') selectedDay = null;
@@ -417,7 +408,7 @@
                     streakLeaderName += `, ${row.user}`;
                 }
 
-                const freezesVal = row.freezes !== undefined ? row.freezes : 0;
+                const freezesVal = row.freezes !== undefined ? row.freezes : (row.freezesCount !== undefined ? row.freezesCount : 0);
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -469,7 +460,8 @@
                     silentRefreshData();
                 }
             } catch (err) {
-                console.error('Błąd:', err);
+                console.error('Błąd połączenia:', err);
+                showNotification("Błąd", "Błąd połączenia z serwerem.");
             }
         }
 
@@ -524,13 +516,14 @@
                     showNotification("Ostrzeżenie", result.message);
                 }
             } catch (err) {
-                console.error('Błąd:', err);
+                console.error('Błąd połączenia z serwerem:', err);
                 if (previousStatus === 'none') {
                     delete userData[day];
                 } else {
                     userData[day] = previousStatus;
                 }
                 renderGrid();
+                showNotification("Błąd", "Błąd połączenia z serwerem. Zmiana została cofnięta.");
             }
         }
     </script>
