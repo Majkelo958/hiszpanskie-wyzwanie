@@ -25,10 +25,13 @@
         #loginSection button { padding: 12px 30px; font-size: 18px; background-color: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #loginSection button:hover { background-color: #34495e; }
 
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px; }
         .dashboard-header h1 { margin: 0; text-align: left; }
+        .header-buttons { display: flex; gap: 8px; align-items: center; }
         .btn-logout { background: #95a5a6; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-logout:hover { background: #7f8c8d; }
+        .btn-rules { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-rules:hover { background: #34495e; }
 
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .stat-card { background: #ecf0f1; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; color: #34495e; }
@@ -64,7 +67,7 @@
         .modal-btn.btn-freeze { background-color: var(--freeze); }
         .modal-btn.btn-recovery { background-color: var(--recovery); }
         .modal-btn.btn-clear { background-color: #95a5a6; }
-        .modal-btn.btn-gift { background-color: #2980b9; }
+        .modal-btn.btn-gift { background-color: var(--2980b9); }
         .modal-btn:hover { opacity: 0.9; }
 
         .user-list-select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background-color: white; }
@@ -91,7 +94,10 @@
         <div id="dashboardSection" class="section">
             <div class="dashboard-header">
                 <h1 id="welcomeUser" style="margin:0;">Witaj</h1>
-                <button class="btn-logout" onclick="handleLogout()">Zmień użytkownika</button>
+                <div class="header-buttons">
+                    <button class="btn-rules" onclick="openRulesModal()">📖 Regulamin</button>
+                    <button class="btn-logout" onclick="handleLogout()">Zmień użytkownika</button>
+                </div>
             </div>
             
             <div class="stats-container">
@@ -144,6 +150,7 @@
         </div>
     </div>
 
+    <!-- Modal Statusu Dnia -->
     <div id="statusModal" class="modal-overlay">
         <div class="modal">
             <h3 id="modalTitle">Wybierz status</h3>
@@ -156,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Modal Prezentu -->
     <div id="giftModal" class="modal-overlay">
         <div class="modal">
             <h3>🎁 Podaruj zamrożenie</h3>
@@ -166,6 +174,21 @@
         </div>
     </div>
 
+    <!-- Modal Regulaminu -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal" style="max-width: 400px; text-align: left;">
+            <h3 style="text-align: center;">📖 Regulamin Wyzwania</h3>
+            <ul style="font-size: 13px; color: #444; padding-left: 20px; line-height: 1.5;">
+                <li>Codziennie zaznaczaj wykonanie swojego zadania (Zaliczone).</li>
+                <li>Masz do dyspozycji <b>2 zamrożenia</b> (❄️) na wypadek trudniejszych dni.</li>
+                <li>Możesz skorzystać z <b>2 nadrobień</b> (🔥).</li>
+                <li>Możesz podarować jedno zamrożenie innemu uczestnikowi przez przycisk prezentu.</li>
+            </ul>
+            <button class="modal-btn btn-gift" onclick="closeModal('rulesModal')">Rozumiem</button>
+        </div>
+    </div>
+
+    <!-- Modal Informacyjny -->
     <div id="infoModal" class="modal-overlay">
         <div class="modal">
             <h3 id="infoModalTitle">Powiadomienie</h3>
@@ -175,7 +198,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOGASrM72G4fGbanQpkJMWCEAPPfEe2AV_g6M5GGNOmItY0_WIFqRnVP4OjpZN9ELA/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwThR48DCTcRXufewDGQOLAGp0zuuLi-eAtpOcNDuGGVG23nArpbke-vxLCPABrnEyM/exec"; 
 
         let currentUser = "";
         let userData = {};
@@ -185,6 +208,7 @@
         let currentRecoveriesCount = 2;
         let hasGivenFreeze = false;
         let refreshInterval = null;
+        let isRefreshing = false;
 
         function showNotification(title, message) {
             document.getElementById('infoModalTitle').innerText = title;
@@ -249,15 +273,16 @@
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
             refreshInterval = setInterval(() => {
-                if (currentUser) {
+                if (currentUser && !isRefreshing) {
                     silentRefreshData();
                 }
             }, 15000);
         }
 
         async function silentRefreshData() {
+            if (isRefreshing) return;
+            isRefreshing = true;
             try {
-                // Jedno szybkie zapytanie pobierające wszystko naraz!
                 const response = await fetch(`${SCRIPT_URL}?action=getAppData&user=${encodeURIComponent(currentUser)}`);
                 const result = await response.json();
                 
@@ -295,6 +320,8 @@
                 }
             } catch (err) {
                 console.error('Błąd odświeżania:', err);
+            } finally {
+                isRefreshing = false;
             }
         }
 
@@ -354,6 +381,10 @@
             }
 
             document.getElementById('giftModal').classList.add('active');
+        }
+
+        function openRulesModal() {
+            document.getElementById('rulesModal').classList.add('active');
         }
 
         function closeModal(modalId) {
