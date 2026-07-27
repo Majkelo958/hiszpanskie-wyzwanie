@@ -26,11 +26,14 @@
         #loginSection button { padding: 12px 30px; font-size: 18px; background-color: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #loginSection button:hover { background-color: #34495e; }
 
-        /* Nagłówek panelu z przyciskiem wylogowania */
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        /* Nagłówek panelu z przyciskami zarządzania */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px; }
         .dashboard-header h1 { margin: 0; text-align: left; }
-        .btn-logout { background: #95a5a6; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
-        .btn-logout:hover { background: #7f8c8d; }
+        .header-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-header { background: #95a5a6; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-header:hover { background: #7f8c8d; }
+        .btn-rules { background: #34495e; }
+        .btn-rules:hover { background: #2c3e50; }
 
         /* Panel główny i statystyki */
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
@@ -64,6 +67,14 @@
         .modal-overlay.active { display: flex; }
         .modal { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
         .modal h3 { margin-top: 0; color: var(--primary); font-size: 18px; }
+        
+        /* Modal regulaminu (większy) */
+        .modal-rules { max-width: 600px; max-height: 85vh; text-align: left; display: flex; flex-direction: column; }
+        .rules-content { overflow-y: auto; max-height: 60vh; padding-right: 5px; font-size: 14px; line-height: 1.5; color: #444; }
+        .rules-content h3 { color: var(--primary); margin-top: 15px; margin-bottom: 5px; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+        .rules-content p, .rules-content ul { margin: 8px 0; }
+        .rules-content ul { padding-left: 20px; }
+
         .modal-btn { width: 100%; padding: 12px; margin: 6px 0; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; }
         .modal-btn.btn-done { background-color: var(--success); }
         .modal-btn.btn-missed { background-color: var(--accent); }
@@ -100,7 +111,10 @@
         <div id="dashboardSection" class="section">
             <div class="dashboard-header">
                 <h1 id="welcomeUser" style="margin:0;">Witaj</h1>
-                <button class="btn-logout" onclick="handleLogout()">Zmień użytkownika</button>
+                <div class="header-buttons">
+                    <button class="btn-header btn-rules" onclick="openRulesModal()">📜 Zasady wyzwania</button>
+                    <button class="btn-header" onclick="handleLogout()">Zmień użytkownika</button>
+                </div>
             </div>
             
             <div class="stats-container">
@@ -182,6 +196,67 @@
         </div>
     </div>
 
+    <!-- Modal Regulaminu -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal modal-rules">
+            <h2 style="color: var(--primary); margin-top: 0; text-align: center; font-size: 20px;">📜 Regulamin Hiszpańskiego Wyzwania</h2>
+            <div class="rules-content">
+                <h3>Cel wyzwania</h3>
+                <p>Celem wyzwania jest systematyczna, codzienna nauka języka hiszpańskiego przez cały okres trwania wyzwania.</p>
+
+                <h3>Zaliczony dzień nauki</h3>
+                <p>Dzień uznaje się za zaliczony, jeśli wykonane zostały wszystkie poniższe elementy:</p>
+                <ul>
+                    <li>Wysłuchanie połowy lekcji MP3, śledząc tekst.</li>
+                    <li>Napisanie z pamięci hiszpańskiego tłumaczenia polskich zdań (1 strona z książki) – tyle, ile udało się zapamiętać.</li>
+                    <li>Ponowne wysłuchanie tej samej części lekcji MP3, tłumacząc na głos polskie zdania na hiszpański, zanim zrobi to lektor.</li>
+                </ul>
+                <p>Można wykonać większą ilość materiału jednego dnia, jednak nie zalicza to nauki na kolejne dni. Każdy dzień należy zaliczyć oddzielnie.</p>
+
+                <h3>Zamrożenia</h3>
+                <p>Każdy uczestnik otrzymuje 2 zamrożenia.</p>
+                <ul>
+                    <li>Zamrożenie pozwala opuścić dzień nauki bez utraty możliwości ukończenia wyzwania.</li>
+                    <li>Każde zamrożenie można wykorzystać tylko raz.</li>
+                </ul>
+
+                <h3>Przekazywanie zamrożeń</h3>
+                <ul>
+                    <li>Każdy uczestnik może tylko raz podarować jedno zamrożenie innej osobie.</li>
+                    <li>Każdy uczestnik może tylko raz przyjąć zamrożenie od innego uczestnika.</li>
+                </ul>
+
+                <h3>Nadrobienia</h3>
+                <p>Każdy uczestnik otrzymuje 2 nadrobienia.</p>
+                <p>Nadrobienie działa w następujący sposób:</p>
+                <ul>
+                    <li>Jeśli jednego dnia nie udało się zrealizować nauki, następnego dnia można wykonać materiał zarówno za dzień poprzedni, jak i za dzień bieżący, wykorzystując jedno nadrobienie.</li>
+                </ul>
+
+                <h3>Ukończenie wyzwania</h3>
+                <p>Wyzwanie uznaje się za ukończone, jeśli uczestnik zaliczy wszystkie dni nauki z uwzględnieniem przysługujących mu zamrożeń i nadrobiń.</p>
+
+                <h3>Jeśli nie uda się ukończyć wyzwania</h3>
+                <p>Osoba, która wykorzysta wszystkie dostępne zamrożenia i nadrobienia, a mimo to opuści kolejny dzień nauki, nie ukończy wyzwania.</p>
+                <p>Może jednak nadal walczyć o jak najlepszy wynik. Jeśli osiągnie co najmniej 23 zaliczone dni nauki, obowiązują ją złagodzone zasady dotyczące nagród:</p>
+                <ul>
+                    <li>Nie kupuje nagrody wszystkim uczestnikom, którzy ukończyli wyzwanie.</li>
+                    <li>Kupuje nagrodę jedynie dwóm wybranym uczestnikom, którzy ukończyli wyzwanie.</li>
+                </ul>
+                <p>Jeżeli wyzwanie ukończą tylko 2 osoby, wówczas kupuje nagrodę tylko jednej z nich.</p>
+
+                <h3>Nagrody</h3>
+                <p>Przed rozpoczęciem wyzwania uczestnicy wspólnie ustalają pulę nagród, spośród których zwycięzcy będą mogli dokonać wyboru.</p>
+                <p>Po rozpoczęciu wyzwania pula nagród pozostaje niezmienna i nie podlega zmianom.</p>
+                <p>Osoby, które ukończą wyzwanie, otrzymują wybraną przez siebie nagrodę z wcześniej ustalonej puli, zgodnie z zasadami obowiązującymi w wyzwaniu.</p>
+
+                <h3>Zasady fair play</h3>
+                <p>Wyzwanie opiera się na wzajemnym zaufaniu i uczciwości. Każdy uczestnik samodzielnie odpowiada za rzetelne wykonywanie materiału oraz zgodne z prawdą zgłaszanie zaliczonych dni nauki.</p>
+            </div>
+            <button class="modal-btn btn-gift" style="margin-top: 15px;" onclick="closeModal('rulesModal')">Zamknij regulamin</button>
+        </div>
+    </div>
+
     <!-- Modal Informacyjny -->
     <div id="infoModal" class="modal-overlay">
         <div class="modal">
@@ -192,7 +267,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJR8Y_wLYSb5n4-OeNDm6gI5lkgelGn1lz4hMC0q10LUwVAxRwrREQJrSOAgDmTuWj/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxB5jDJHZoBhszQ3CsS-o7hgGP3AAhMuDM31LtIStMgEGddyKJtBbtqjaOvIB29Us1w/exec"; 
 
         let currentUser = "";
         let userData = {};
@@ -212,7 +287,6 @@
         window.onload = function() {
             loadLoginLeaderboard();
             
-            // Automatyczne logowanie z pamięci przeglądarki, jeśli użytkownik był już zalogowany
             const savedUser = localStorage.getItem('hiszpanskie_wyzwanie_user');
             if (savedUser) {
                 currentUser = savedUser;
@@ -267,9 +341,12 @@
             loadLoginLeaderboard();
         }
 
+        function openRulesModal() {
+            document.getElementById('rulesModal').classList.add('active');
+        }
+
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
-            // Odświeżaj dane w tle co 15 sekund
             refreshInterval = setInterval(() => {
                 if (currentUser) {
                     silentRefreshData();
