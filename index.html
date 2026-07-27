@@ -265,7 +265,6 @@
                     document.getElementById('recoveriesCount').innerText = currentRecoveriesCount;
                     document.getElementById('maxRecoveriesCount').innerText = 2;
 
-                    // Obsługa blokady przycisku prezentu bazująca na flagzie z backendu
                     const giftBtn = document.getElementById('giftFreezeBtn');
                     const giftText = document.getElementById('giftButtonText');
                     if (hasGivenFreeze) {
@@ -369,15 +368,12 @@
                     streakLeaderName += `, ${row.user}`;
                 }
 
-                // Odczytujemy licznik zamrożeń bezpośrednio z pola row.freezes (tak samo jak górny licznik)
-                const freezesVal = row.freezes !== undefined ? row.freezes : 2;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
                     <td><b>${row.user}</b></td>
                     <td>${row.done}</td>
-                    <td>${freezesVal}</td>
+                    <td>${row.freezes}</td>
                     <td>${row.recoveries}</td>
                     <td>${row.streak} dni</td>
                 `;
@@ -432,14 +428,12 @@
             const day = selectedDay;
             const previousStatus = userData[day] || 'none';
             
-            // Błyskawiczna blokada frontendowa dla zamrożeń
             if (nextStatus === 'frozen' && previousStatus !== 'frozen' && currentFreezesCount <= 0) {
                 closeModal('statusModal');
                 showNotification("Limit wyczerpany", "Nie masz już dostępnych zamrożeń!");
                 return;
             }
 
-            // Błyskawiczna blokada frontendowa dla nadrobień
             if (nextStatus === 'recovered' && previousStatus !== 'recovered' && currentRecoveriesCount <= 0) {
                 closeModal('statusModal');
                 showNotification("Limit wyczerpany", "Nie masz już dostępnych nadrobień!");
@@ -448,7 +442,6 @@
 
             closeModal('statusModal');
 
-            // Symulacja zmian wizualnych (zabezpieczona)
             if (nextStatus === 'none') {
                 delete userData[day];
             } else {
@@ -469,7 +462,7 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    loadUserData(); // Pobranie rzetelnego stanu z backendu
+                    loadUserData(); 
                     
                     fetch(`${SCRIPT_URL}?action=getLeaderboard`)
                         .then(res => res.json())
@@ -480,7 +473,6 @@
                             }
                         });
                 } else {
-                    // Przywrócenie stanu w razie odrzucenia przez serwer
                     if (previousStatus === 'none') {
                         delete userData[day];
                     } else {
