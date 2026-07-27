@@ -369,12 +369,15 @@
                     streakLeaderName += `, ${row.user}`;
                 }
 
+                // Odczytujemy licznik zamrożeń bezpośrednio z pola row.freezes (tak samo jak górny licznik)
+                const freezesVal = row.freezes !== undefined ? row.freezes : 2;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>#${index + 1}</td>
                     <td><b>${row.user}</b></td>
                     <td>${row.done}</td>
-                    <td>${row.frozen !== undefined ? row.frozen : 0}</td>
+                    <td>${freezesVal}</td>
                     <td>${row.recoveries}</td>
                     <td>${row.streak} dni</td>
                 `;
